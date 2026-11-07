@@ -1,0 +1,62 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please **don't** report security problems here; see SECURITY.md.
+        Before attaching logs, projects or screenshots, check that they contain nothing private.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Import a folder of 200 PNG icons
+        2. Apply the "Tilted Wall" template
+        3. …
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Settings → About, or the commit you're running.
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: Windows 11 23H2
+    validations:
+      required: true
+  - type: dropdown
+    id: how
+    attributes:
+      label: How did you start the app?
+      options:
+        - Start Icon Forge Showcase.bat
+        - npm run app
+        - npm run dev (browser)
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log lines
+      description: Relevant lines from data/logs/main.log, if any. Home-folder paths are already shortened to ~.
+      render: text
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Screenshots, number of assets, image sizes… anything that might help.

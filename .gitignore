@@ -1,0 +1,40 @@
+# dependencies and build output
+node_modules/
+dist/
+release/
+*.tsbuildinfo
+.vite/
+
+# the app's own data (projects, settings, autosaves, trash, cache, logs) and exports
+/data/
+/exports/
+
+# logs, caches and temporary files
+*.log
+logs/
+.cache/
+coverage/
+*.tmp
+*.tmp-*
+*.bak
+
+# personal documents and project files — never part of the source
+/*.docx
+/*.pdf
+/*.xlsx
+*.showcase
+test-fixtures/
+
+# local environment, editor and tool settings
+.env
+.env.*
+.claude/
+.idea/
+.vscode/
+*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+/e2e-out/

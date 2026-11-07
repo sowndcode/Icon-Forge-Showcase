@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+  <!-- Icon Forge Showcase mark: three icons standing on a floor. Same geometry as Logo in src/ui/Shell.tsx. -->
+  <rect x="2" y="2.5" width="4.5" height="4.5" rx="1.25" />
+  <rect x="7.75" y="1" width="4.5" height="6" rx="1.25" />
+  <rect x="13.5" y="2.5" width="4.5" height="4.5" rx="1.25" />
+  <path d="M4 10.5h12l3 7.5H1z" opacity="0.42" />
+</svg>

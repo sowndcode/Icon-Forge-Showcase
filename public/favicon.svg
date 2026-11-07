@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- App icon (window, taskbar, executable): the mark from logo.svg on the app's graphite. -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#141415" />
+  <rect x="2.5" y="2.5" width="59" height="59" rx="13.5" fill="none" stroke="#ffffff" stroke-opacity="0.12" />
+  <g transform="translate(12 13) scale(2)" fill="#ededef">
+    <rect x="2" y="2.5" width="4.5" height="4.5" rx="1.25" />
+    <rect x="7.75" y="1" width="4.5" height="6" rx="1.25" />
+    <rect x="13.5" y="2.5" width="4.5" height="4.5" rx="1.25" />
+    <path d="M4 10.5h12l3 7.5H1z" opacity="0.42" />
+  </g>
+</svg>
