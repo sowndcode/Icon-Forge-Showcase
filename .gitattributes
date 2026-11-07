@@ -1,2 +1,8 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Vitest writes snapshots with LF; keep them LF on every checkout so `npm test` leaves them unchanged
+*.snap text eol=lf
+
+# cmd.exe can misread labels in batch files with LF endings
+*.bat text eol=crlf
