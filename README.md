@@ -86,27 +86,55 @@ layout flexibility is being considered. Nothing is scheduled yet, and there are 
 **Themes and layouts:** restyle a page and pick from dozens of layouts.
 ![Themes and layouts](docs/screenshots/themes-and-layouts.png)
 
-## Requirements
+## Install and run
 
-- **Windows 10 or 11** (64-bit). This is the only platform it's developed and tested on. The code is
-  cross-platform Electron, but other systems are untested, and the launcher is a Windows `.bat` file.
-- **Node.js 20.19+ or 22.12+** (LTS recommended) with npm.
+Icon Forge Showcase runs on **Windows 10 or 11 (64-bit)**. This is the only platform it's developed
+and tested on. The code is cross-platform Electron, but other systems are untested.
+
+There are two ways to get it:
+
+| | Portable Windows build | From source |
+| --- | --- | --- |
+| For | Using the app | Developers, or trying the latest code |
+| You need | Nothing else installed | Node.js and npm |
+| Available | Only when a release on the [Releases page](https://github.com/sowndcode/Icon-Forge-Showcase/releases) includes a ZIP | Always |
+
+### Option 1: portable Windows build
+
+Use this if the [Releases page](https://github.com/sowndcode/Icon-Forge-Showcase/releases) lists a
+release with a `.zip` file under **Assets**. If no release has a ZIP yet, use Option 2.
+
+1. Download the `.zip` file from the release's **Assets**.
+2. Right-click the ZIP and choose **Extract All…**. Extract it to a folder you can write to, such as
+   `Documents\Icon Forge Showcase`. Don't run the app from inside the ZIP, and avoid `C:\Program Files`:
+   the app saves your projects in a `data` folder next to `IconForgeShowcase.exe`.
+3. Open the extracted folder and double-click **`IconForgeShowcase.exe`**.
+4. The builds are not code-signed, so Windows SmartScreen may say *"Windows protected your PC"*. Choose
+   **More info**, then **Run anyway**. Only do this for a ZIP downloaded from this repository's Releases page.
+
+No installer, Node.js or internet connection is needed. To remove the app, delete the folder (this also
+deletes the projects in its `data` folder, so export or back up anything you want to keep first).
+
+### Option 2: from source
+
+You need:
+
+- **Node.js 20.19+ or 22.12+** with npm ([nodejs.org](https://nodejs.org/), LTS recommended).
 - About 500 MB of disk space for dependencies (mostly the Electron runtime), plus space for your projects.
-- An internet connection only for the first `npm ci`. The app itself works fully offline.
-
-## Getting started (from source)
+- An internet connection for the first install only. The app itself works fully offline.
 
 ```bash
-git clone <this repository>
-cd <repository folder>
+git clone https://github.com/sowndcode/Icon-Forge-Showcase.git
+cd Icon-Forge-Showcase
 npm ci
+npm run app
 ```
 
-Then either:
+`npm run app` downloads the Electron runtime if npm skipped it, builds the interface when the sources
+changed, and opens the desktop app. Afterwards you can also start it by double-clicking
+**`Start Icon Forge Showcase.bat`** in the folder, which runs the same steps (and `npm ci` too, if needed).
 
-- **Double-click `Start Icon Forge Showcase.bat`.** It installs dependencies if needed, fetches the
-  Electron runtime, builds the interface when the sources changed, and opens the desktop app; or
-- run `npm run app` from a terminal.
+To update, run `git pull` and then `npm ci`. Your `data/` folder is never touched by Git.
 
 Other commands:
 
@@ -117,9 +145,9 @@ Other commands:
 | `npm run typecheck` | TypeScript checks |
 | `npm run build` | Typecheck and production build of the interface into `dist/` |
 
-There are no prebuilt downloads yet. `build_exe.bat` (`npm run package`) makes an unsigned, portable
-Windows folder for personal use; it's not an official release. Versions, the release checklist and how
-to update an installed copy are in [RELEASING.md](RELEASING.md).
+To build the portable Windows folder yourself, run `build_exe.bat` (or `npm run package`). It makes an
+unsigned `release\IconForgeShowcase-win32-x64\` folder for personal use; it's not an official release.
+Versions, the release checklist and how to update an installed copy are in [RELEASING.md](RELEASING.md).
 
 Development checks beyond `npm test` (they use Playwright from a global installation and a freshly
 started `npm run dev`): `node tests/e2e/run.mjs` (Review, import dialog and Export workflows),
@@ -180,15 +208,14 @@ returns visible-box placements) and register it in `src/layout/registry.ts`.
 
 - **Alpha:** the project file format may still change. Old projects are migrated when it does, but keep
   `.showcase` backups of important work.
-- **Windows only** so far (see Requirements).
+- **Windows only** so far (see [Install and run](#install-and-run)).
 - **Fonts:** templates use fonts installed with Windows (e.g. Segoe UI, Bahnschrift, Impact). Other systems
   substitute similar fonts, so layouts can look different. Custom fonts can be imported per project.
 - **The app folder must be writable.** If it isn't, the app warns you and saves to your user profile
   for that session.
 - **Dev mode uses separate storage:** `npm run dev` in a browser uses the browser's own storage, not `data/`.
-- **No auto-update and no signed builds.**
-- **The packaging tool (`@electron/packager`)** has moderate advisories with no fix in its current version.
-  It only runs when building, and isn't part of the app (see [CHANGELOG.md](CHANGELOG.md)).
+- **No auto-update and no signed builds.** Windows SmartScreen may warn the first time you start a
+  downloaded build; updating means downloading the new ZIP (see [RELEASING.md](RELEASING.md)).
 
 ## Contributing
 
