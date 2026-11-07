@@ -74,18 +74,33 @@ Releases are made by a maintainer. Nothing is published or tagged automatically.
    node tests/e2e/run.mjs
    ```
 
-6. Build the Windows app folder (unsigned, portable).
+6. Build the Windows app (unsigned, portable) and its ZIP.
 
    ```bash
    npm run package
    ```
 
-   The result is `release/IconForgeShowcase-win32-x64/`. Zip that folder for distribution. It never
-   contains `data/` or `exports/`.
+   This writes `release/IconForgeShowcase-win32-x64/` and, from that fresh folder,
+   `release/IconForgeShowcase-<version>-win-x64.zip`. **Upload that ZIP, never a ZIP you make by hand:**
+   once the app has been started, the folder holds your own projects, settings and logs in `data/`.
+   The ZIP also carries the licence notices (`LICENSE`, `LICENSES.chromium.html`,
+   `LICENSE.IconForgeShowcase.txt`, `THIRD_PARTY_LICENSES.txt`, `THIRD_PARTY_NOTICES.md`).
 
-7. Smoke-test the packaged app on Windows: start it, check the window and taskbar icon, open Settings ▸
-   About (version, data folder), create a project, import a few PNGs, export one page, close and
-   reopen (the project is still there).
+7. Smoke-test on Windows **from the ZIP**, not the build folder: extract it to a new folder, then
+
+   - start `IconForgeShowcase.exe` (SmartScreen: More info ▸ Run anyway); the window and taskbar show the
+     app icon and the title bar follows the theme;
+   - Settings ▸ About shows the new version and a `data` folder inside the extracted folder;
+   - create a project, import a folder of PNGs (subfolders become categories), apply a template, change
+     the theme, then export one page as PNG and open the file;
+   - save with Ctrl+S to a `.showcase` file, close the app, reopen it: the project is still there; open
+     the `.showcase` file too;
+   - delete a project, then restore it from Settings ▸ Storage ▸ Trash;
+   - check `data/logs/main.log` for errors.
+
+   A copy started with an earlier version's data on the same PC offers or performs a one-time
+   migration; test on a PC (or Windows account) without earlier data as well, to see the first-run
+   experience new users get.
 
 8. Commit the version change, then tag it once the release is approved.
 
@@ -101,6 +116,11 @@ Releases are made by a maintainer. Nothing is published or tagged automatically.
    git push origin v0.2.0-alpha.2
    ```
 
+9. On GitHub, draft a release from the tag: title `Icon Forge Showcase <version>`, notes from
+   `docs/releases/` (copy the latest file and update it) and the `CHANGELOG.md` section, the ZIP from
+   step 6 as the only asset, and **Set as a pre-release** for alpha and beta versions. Check the draft,
+   download the asset once from the draft page and compare its size with the local ZIP, then publish.
+
 ## Reproducibility
 
 - `package-lock.json` pins every dependency; `npm ci` installs exactly those.
@@ -108,8 +128,11 @@ Releases are made by a maintainer. Nothing is published or tagged automatically.
   (`@electron/asar`) to versions without the GHSA-3g3m-2fjr-6pw4 and GHSA-g3hv-75wg-m249 advisories.
   Remove them when `@electron/asar` depends on those versions itself.
 - The Electron version is pinned by the lockfile; `@electron/packager` downloads the matching runtime.
-- Packaged builds turn off Electron's run-as-Node mode, `NODE_OPTIONS` and inspector arguments
-  (`scripts/package.mjs`).
+- Packaged builds turn off Electron's run-as-Node mode, `NODE_OPTIONS` and inspector arguments, load
+  the app only from `app.asar`, verify that archive against the hash embedded in the executable, and
+  turn off the extra `file://` privileges (`scripts/package.mjs`).
+- GitHub Actions (`.github/workflows/ci.yml`) runs typecheck, unit tests, build and `npm audit` on
+  Windows for pull requests and pushes to `main`. It doesn't package or start the app.
 
 ## Updating an installed copy
 

@@ -97,3 +97,29 @@ asar archive; no source maps; the executable carries the app icon (16–256 px),
 - Electron's asar integrity validation and "only load app from asar" fuses are not enabled; they could
   harden the packaged app further but need testing on Windows first.
 - `npm audit` covers known advisories in the npm registry only.
+
+## Addendum: release preparation, 2026-11-07
+
+Checked on Windows 11 with Node 24, ahead of the first public alpha.
+
+- **Electron 44.10.2** (patch update within `^44`): backports upstream Chromium, V8, Skia, PDFium,
+  ANGLE and WebRTC fixes. Electron 44 is the oldest of the three supported major lines (46, 45, 44), so
+  plan the move to a newer major before 44 reaches end of support.
+- **Fuses now on:** `EnableEmbeddedAsarIntegrityValidation` and `OnlyLoadAppFromAsar`;
+  `GrantFileProtocolExtraPrivileges` is off (the app serves itself over `app://`). The packaged app
+  started normally on Windows 11 (window shown, earlier data migrated); after changing one byte of
+  `resources/app.asar` it exited at once with code 1 and wrote nothing.
+- **Configuration re-read in the code:** `contextIsolation`, `sandbox`, no `nodeIntegration`,
+  `webviewTag: false`; CSP sent as a response header for HTML from `app://`; navigation outside
+  `app://showcase/`, new windows and webviews refused; every request other than `app:`, `blob:`,
+  `data:` and `devtools:` cancelled; permissions limited to clipboard writing and fullscreen; IPC only
+  from the app's own page; writes only to dialog-chosen paths (`safeJoin`), stored IDs and keys checked
+  against allow-lists; the smoke-test hooks (`SC_*`) work only in unpackaged runs.
+- **Dependencies:** `npm audit`: 0 vulnerabilities. The `@electron/asar` overrides are still needed: its
+  latest release (4.3.1) still declares `glob ^13` and `minimatch ^10`.
+- **Distribution:** `npm run package` writes the ZIP from the fresh build and refuses one that contains
+  `data/` or `exports/`. Starting the packaged app here copied a developer's earlier projects into
+  `data/` next to the exe (its intended one-time migration), which is why zipping by hand is no longer
+  part of the release steps.
+- **Still open:** builds are not code-signed (SmartScreen warns); `npm audit` covers known registry
+  advisories only.

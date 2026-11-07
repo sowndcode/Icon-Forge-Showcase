@@ -6,13 +6,15 @@ contains **no third-party source code, fonts, images or other assets**. The app 
 
 Dependencies are installed by npm from the public registry and are not stored in this repository.
 When you build or share the app, the runtime dependencies below are included and their licence notices
-must go with it.
+must go with it. `npm run package` does this: the app folder and its ZIP contain Electron's `LICENSE`
+and `LICENSES.chromium.html`, this project's `LICENSE.IconForgeShowcase.txt`, this file, and
+`THIRD_PARTY_LICENSES.txt` with the full licence text of every package bundled into the interface.
 
 ## Runtime dependencies (included in the built app)
 
 | Package | Licence | Notes |
 | --- | --- | --- |
-| [react](https://github.com/facebook/react), [react-dom](https://github.com/facebook/react) | MIT | Copyright (c) Facebook, Inc. and its affiliates |
+| [react](https://github.com/facebook/react), [react-dom](https://github.com/facebook/react), [scheduler](https://github.com/facebook/react) | MIT | Copyright (c) Facebook, Inc. and its affiliates. `scheduler` is a dependency of react-dom |
 | [zustand](https://github.com/pmndrs/zustand) | MIT | Copyright (c) 2019 Paul Henschel |
 | [fflate](https://github.com/101arrowz/fflate) | MIT | Copyright (c) Arjun Barrett |
 | [@fontsource-variable/geist](https://github.com/fontsource/font-files), [@fontsource-variable/geist-mono](https://github.com/fontsource/font-files) | OFL-1.1 | The Geist and Geist Mono typefaces used by the interface. Copyright 2024 The Geist Project Authors (https://github.com/vercel/geist-font). The font files are bundled into the built app; the SIL Open Font License text is in each package folder |
