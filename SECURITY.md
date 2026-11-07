@@ -42,6 +42,9 @@ What the desktop app is designed to guarantee, and what counts as a vulnerabilit
   in a save or folder dialog. IDs and paths are validated so they can't leave those locations.
 - **Untrusted input:** imported images, fonts and `.showcase` files are treated as untrusted. A file that
   crashes the app, escapes its folder or runs code is a vulnerability.
+- **Locked-down packaged builds.** The executable built by `npm run package` can't be run as plain Node.js,
+  ignores `NODE_OPTIONS` and inspector arguments, loads the app only from `resources/app.asar`, and refuses
+  to start if that archive doesn't match the hash embedded in the executable.
 
 Out of scope:
 

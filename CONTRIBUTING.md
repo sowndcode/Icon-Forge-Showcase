@@ -35,9 +35,9 @@ npm run typecheck  # TypeScript
 npm run build      # typecheck + production build
 ```
 
-If `node_modules/electron/dist/electron.exe` is missing after `npm ci` (newer npm versions skip
-Electron's download step), run `node node_modules/electron/install.js`, or start the app once with
-`Start Icon Forge Showcase.bat`, which does this for you.
+Newer npm versions can skip Electron's download step during `npm ci`. `npm run app` and
+`Start Icon Forge Showcase.bat` fetch the runtime when it's missing; you can also run
+`node node_modules/electron/install.js` yourself.
 
 The README has a map of the source tree. Desktop-only code (file storage, dialogs, IPC) lives in
 `electron/`, and the interface reaches it only through the small API in `electron/preload.cjs`.
@@ -46,7 +46,8 @@ The README has a map of the source tree. Desktop-only code (file storage, dialog
 
 1. Fork the repository and create a branch from `main`.
 2. Keep each pull request to one change. Avoid unrelated reformatting.
-3. Before opening it, make sure all of these pass:
+3. Before opening it, make sure all of these pass (GitHub Actions runs them, plus `npm audit`, on every
+   pull request):
    ```bash
    npm run typecheck
    npm test

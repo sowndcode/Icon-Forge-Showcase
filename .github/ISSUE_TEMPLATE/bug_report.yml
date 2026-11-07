@@ -43,6 +43,7 @@ body:
     attributes:
       label: How did you start the app?
       options:
+        - IconForgeShowcase.exe from a release ZIP
         - Start Icon Forge Showcase.bat
         - npm run app
         - npm run dev (browser)

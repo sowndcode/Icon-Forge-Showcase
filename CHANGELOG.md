@@ -94,19 +94,42 @@ Everything below up to 0.1.0-alpha.1 is part of this version. This milestone's p
   `package.json` only.
 - **Versioning:** see `RELEASING.md` for the version policy and the build and release steps.
 
+### Release engineering
+
+- **`npm run package` also writes the ZIP to share**, `release/IconForgeShowcase-<version>-win-x64.zip`,
+  straight from the fresh build. A copy of the app that has been started keeps the user's projects and
+  logs in `data/` next to the exe, so the script refuses to zip a folder with `data/` or `exports/`.
+- **Licence notices ship with the app:** the build adds `THIRD_PARTY_LICENSES.txt` (the full licence of
+  every package bundled into the interface, including the Geist fonts' SIL Open Font License), this
+  project's `LICENSE.IconForgeShowcase.txt` and `THIRD_PARTY_NOTICES.md`, next to Electron's own notices.
+- **Continuous integration:** GitHub Actions runs typecheck, unit tests, the production build and
+  `npm audit` on Windows for every pull request and every push to `main`.
+- `.gitattributes` keeps test snapshots LF (on Windows every `npm test` used to mark them modified) and
+  batch files CRLF.
+- The README's install section separates the portable Windows build from running from source.
+
 ### Security
 
 - The packaging tool's `glob` and `minimatch` (through `@electron/asar`) are raised with npm
   `overrides` past GHSA-3g3m-2fjr-6pw4 and GHSA-g3hv-75wg-m249; `npm audit` reports none. These were
   build-time only and not reachable from the app. Report: `docs/security-review-0.2.0-alpha.1.md`.
 - The new native call (title bar theme) accepts only `dark`, `light` or `system` from the app's own page.
+- **Electron 44.10.2**, with backported Chromium, V8, Skia, PDFium, ANGLE and WebRTC fixes.
+- **Packaged builds verify their own code:** the embedded asar integrity check and "only load the app
+  from the asar archive" fuses are on, and the `file://` extra-privileges fuse is off (the app uses its
+  own `app://` protocol). A build whose `app.asar` was changed by one byte refuses to start.
 
 ### Known issues
 
-- Desktop checks for this version ran on Linux (Electron under a virtual display); Windows-specific
-  behaviour (taskbar icon, dark title bar, Snap Layouts) follows Electron's documented behaviour but was
-  not run on Windows here.
+- The packaged app was started on Windows 11 (start-up, migration of earlier data, window shown,
+  integrity check). Its taskbar icon, dark title bar and Snap Layouts were not inspected visually, and
+  the editor's desktop-only paths (save dialogs, folder export) were last exercised on Linux.
+- The first start of a copy that migrates data from a version before the file-based storage took about
+  45 seconds on Windows 11 before the window appeared; later starts don't migrate.
 - Text placed directly over icons is not checked for readability (only backgrounds and panels).
+- The template audit (68 templates under 7 themes) flags one low-contrast line: "FULL PACK" in
+  Demo · Split Grid (wide) under Minimal dark (2.57:1). Horror's red titles on black (about 2.8:1) are
+  intentional.
 - Very long pack names fit by shrinking the title; pixel fonts become hard to read at that size.
 
 ### Security, reliability and large packs
