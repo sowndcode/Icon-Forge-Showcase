@@ -225,6 +225,14 @@ Bug reports, ideas and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBU
   and the relevant lines from `data/logs/main.log`. Check them for anything private first.
 - **Security problems:** please don't open a public issue. See [SECURITY.md](SECURITY.md).
 
+## Support the Project
+
+If you find Icon Forge Showcase useful and would like to support its development, feel free to check out my [itch.io page](https://sownddddd.itch.io/).
+
+## License
+
+[MIT](LICENSE). Third-party components are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
 ## License
 
 [MIT](LICENSE). Third-party components are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
