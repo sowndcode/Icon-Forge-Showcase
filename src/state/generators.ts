@@ -472,7 +472,7 @@ function cardCover(assets: AssetRecord[], pack: string, bg: Background, w: numbe
   let p = createPage('Card grid', w, h, bg);
   const k = Math.min(w, h) / 1080;
   p.safeZone = { enabled: true, top: 30, right: 6, bottom: 7, left: 6 };
-  p.objects = [titleText(p, packTitle(pack), h * 0.11, 120 * k, { stroke: { enabled: true, color: '#111318', width: 9 * k } }, demo ? 0.6 : 0.86), countPill(assets, demo, w / 2, h * 0.215, k * 1.05)];
+  p.objects = [titleText(p, packTitle(pack), h * 0.11, 120 * k, { stroke: { enabled: true, color: '#111318', width: 9 * k } }, demo ? 0.54 : 0.86, 2), countPill(assets, demo, w / 2, h * 0.215, k * 1.05)];
   p = placeAssets(p, assets.slice(0, cols * rows), { algorithm: 'grid', params: { columns: cols, rows, gapX: 46 * k, gapY: 46 * k, fill: 0.7, padding: 10 * k } }, 0.14);
   const out = withCards(p, k);
   return demo ? demoExtras(out, assets, k) : out;
@@ -497,7 +497,7 @@ function shelfCover(assets: AssetRecord[], pack: string, bg: Background, w: numb
   let p = createPage('Shelves', w, h, bg);
   const k = Math.min(w, h) / 1080;
   p.safeZone = { enabled: true, top: 25, right: 5, bottom: 4, left: 5 };
-  p.objects = [titleText(p, packTitle(pack), h * 0.1, 118 * k, { stroke: { enabled: true, color: '#111318', width: 9 * k } }, demo ? 0.6 : 0.86), countPill(assets, demo, w / 2, h * 0.2, k)];
+  p.objects = [titleText(p, packTitle(pack), h * 0.1, 118 * k, { stroke: { enabled: true, color: '#111318', width: 9 * k } }, demo ? 0.54 : 0.86, 2), countPill(assets, demo, w / 2, h * 0.2, k)];
   const cols = demo ? 4 : 5,
     rowsN = demo ? 2 : 3;
   p = placeAssets(p, assets.slice(0, cols * rowsN), { algorithm: 'grid', params: { columns: cols, rows: rowsN, gapX: 30 * k, gapY: 60 * k, fill: 0.86 } }, 0.14);
@@ -929,7 +929,7 @@ export const BUILTIN_TEMPLATES: TemplateDef[] = [
       p.safeZone = { enabled: true, top: 24, right: 4, bottom: 4, left: 4 };
       const panel = createShape('rect', 315, 60, 590, 92, { fill: '#000000', opacity: 0.45, radius: 14, name: 'Header panel' });
       p.objects = [panel, titleText(p, packTitle(pack), 50, 40, { stroke: { enabled: true, color: '#111318', width: 4 } }, 0.9), titleText(p, `${countToken(assets)}+ ICONS`, 88, 18, { fontFamily: 'Bahnschrift', fontWeight: 600, letterSpacing: 3, fill: '#f5c542' })];
-      p = placeAssets(p, assets.slice(0, 30), { algorithm: 'grid', params: { gap: 10 } }, 0.1);
+      p = placeAssets(p, assets.slice(0, 28), { algorithm: 'grid', params: { gapX: 8, gapY: 8, padding: 4, fill: 0.9 } }, 0.1);
       return p;
     },
   },
@@ -1084,7 +1084,7 @@ export const BUILTIN_TEMPLATES: TemplateDef[] = [
       // title across the top, the flow fills the rest
       p.safeZone = { enabled: true, top: 26, right: 2, bottom: 2, left: 2 };
       p.objects = [titleText(p, packTitle(pack), 120, 100, { stroke: { enabled: true, color: '#111318', width: 9 } }, 0.8), presetText('Count pill', `${countToken(assets)}+ ICONS`, 960, 215, 0.95)];
-      p = placeAssets(p, assets, { algorithm: 'diagonal', params: { growth: 0.6, angle: 18 } }, 0.1);
+      p = placeAssets(p, assets, { algorithm: 'diagonal', params: { growth: 0.6, angle: 18, fill: 1.12 } }, 0.1);
       return p;
     },
   },
@@ -1775,6 +1775,10 @@ function leftText(text: string, left: number, y: number, style: Partial<TextStyl
   t.x = left + maxW / 2;
   return t;
 }
+/** Move `sub` so it sits `gap` under `title`, however many lines the title took. */
+function under<T extends { y: number; h: number }>(title: { y: number; h: number }, sub: T, gap: number): T {
+  return { ...sub, y: Math.max(sub.y, title.y + title.h / 2 + gap + sub.h / 2) };
+}
 /** Centred text that fits `maxW`. */
 function centerText(text: string, cx: number, y: number, style: Partial<TextStyle>, maxW: number) {
   const t = leftText(text, cx - maxW / 2, y, style, maxW);
@@ -1822,7 +1826,8 @@ export const PRO_TEMPLATES: TemplateDef[] = [
     build(assets, pack) {
       let p = createPage('Minimal cover', 630, 500, studioDark());
       p.safeZone = { enabled: true, top: 30, right: 6, bottom: 6, left: 6 };
-      p.objects = [leftText(packTitleCase(pack), 38, 66, proStyle(DARK, 42), 554), leftText(factLine(assets), 38, 110, proStyle(DARK_SUB, 16, 450), 554)];
+      const title = leftText(packTitleCase(pack), 38, 66, proStyle(DARK, 42), 554);
+      p.objects = [title, under(title, leftText(factLine(assets), 38, 110, proStyle(DARK_SUB, 16, 450), 554), 8)];
       return placeAssets(p, assets.slice(0, 15), { algorithm: 'grid', params: { complete: true, fill: 0.78, gapX: 14, gapY: 14, padding: 0 } }, 0.12);
     },
   },
@@ -2029,6 +2034,74 @@ export const PRO_TEMPLATES: TemplateDef[] = [
       p.safeZone = { enabled: true, top: 12, right: 4, bottom: 12, left: 4 };
       p.objects = [leftText(packTitleCase(pack), 110, 210, proStyle(DARK, 72), 760), leftText(factLine(assets), 110, 286, proStyle(DARK_SUB, 26, 450), 760)];
       return placeAssets(p, assets.slice(0, 24), { algorithm: 'split', params: { side: 'right', share: 0.52, style: 'grid', gap: 16, fill: 0.82 } }, 0.1);
+    },
+  },
+  {
+    id: 'pro-contents',
+    name: 'Pack Contents',
+    group: 'Clean & professional',
+    look: 'pro-studio-dark',
+    w: 1920,
+    h: 1080,
+    description: 'What is inside: every category with its icon count on the left, a tidy grid on the right.',
+    build(assets, pack) {
+      let p = createPage('Pack contents', 1920, 1080, studioDark());
+      p.safeZone = { enabled: true, top: 9, right: 5, bottom: 9, left: 5 };
+      const f = packFacts(assets);
+      const counts = f.categories.map((c): [string, string] => [c, String(assets.filter((a) => a.category === c).length)]);
+      // packs without categories list the facts read from the files instead
+      const rows: [string, string][] =
+        counts.length > 1
+          ? [...counts.slice(0, 6), ...(counts.length > 6 ? [[`${counts.length - 6} more categories`, String(counts.slice(6).reduce((n, c) => n + Number(c[1]), 0))] as [string, string]] : [])]
+          : [['Icons', `${countToken(assets)}`], ['Format', f.formats || 'PNG'], ['Sizes', f.sizes || 'Any'], ...(f.alpha ? [['Background', 'Transparent'] as [string, string]] : [])];
+      const L = 110,
+        R = 800,
+        step = Math.min(96, 560 / rows.length),
+        y0 = 440;
+      const title = leftText(packTitleCase(pack), L, 190, proStyle(DARK, 92), R - L);
+      p.objects = [title, under(title, leftText(factLine(assets), L, 286, proStyle(DARK_SUB, 30, 450), R - L), 16), hairline(L, R, y0 - step / 2, 1)];
+      rows.forEach(([name, value], i) => {
+        const y = y0 + i * step;
+        const v = leftText(value, R - 280, y, proStyle(DARK, 40, 600, { fontFamily: PRO_MONO }), 280);
+        p.objects.push(leftText(name, L, y, proStyle(DARK_SUB, 40, 500), R - L - 300), { ...v, style: { ...v.style, align: 'right' } }, hairline(L, R, y + step / 2, 1));
+      });
+      p = placeAssets(p, assets.slice(0, 30), { algorithm: 'split', params: { side: 'right', share: 0.5, style: 'grid', gap: 22, fill: 0.78 } }, 0.1);
+      return softCells(p);
+    },
+  },
+  {
+    id: 'pro-spotlight-cover',
+    name: 'Light Spotlight Cover',
+    group: 'itch.io covers',
+    look: 'pro-studio-light',
+    w: 630,
+    h: 500,
+    description: 'A bright cover: one featured icon set large inside an even grid, title and facts above.',
+    build(assets, pack) {
+      let p = createPage('Spotlight cover', 630, 500, studioLight());
+      p.safeZone = { enabled: true, top: 29, right: 6, bottom: 6, left: 6 };
+      const title = leftText(packTitleCase(pack), 38, 64, proStyle(LIGHT, 42), 554);
+      p.objects = [title, under(title, leftText(factLine(assets), 38, 108, proStyle(LIGHT_SUB, 16, 450), 554), 8)];
+      p = placeAssets(p, assets.slice(0, 13), { algorithm: 'feature', params: { span: '2', gap: 10, padding: 0, fill: 0.76 } }, 0.12);
+      return softCells(p, '#000000', 0.045);
+    },
+  },
+  {
+    id: 'pro-story',
+    name: 'Clean Story',
+    group: 'Square & social',
+    look: 'pro-studio-dark',
+    w: 1080,
+    h: 1920,
+    description: 'Portrait for stories and reels: title on top, twelve icons in quiet cells, the count below.',
+    build(assets, pack) {
+      let p = createPage('Clean story', 1080, 1920, studioDark());
+      p.safeZone = { enabled: true, top: 24, right: 8, bottom: 14, left: 8 };
+      const title = leftText(packTitleCase(pack), 88, 250, proStyle(DARK, 104), 904);
+      p.objects = [title, under(title, leftText(factLine(assets), 88, 372, proStyle(DARK_SUB, 32, 450), 904), 22), proChip(`${countToken(assets)} icons`, 540, 1760, 38)];
+      const shown = assets.slice(0, 12);
+      p = placeAssets(p, shown, { algorithm: 'grid', params: { columns: shown.length > 4 || !shown.length ? 3 : 2, rows: shown.length ? Math.ceil(shown.length / (shown.length > 4 ? 3 : 2)) : 4, fill: 0.74, gapX: 28, gapY: 28, padding: 0 } }, 0.12);
+      return softCells(p);
     },
   },
 ];
