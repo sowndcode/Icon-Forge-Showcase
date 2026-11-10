@@ -245,7 +245,7 @@ function MarketplaceDialog({ onClose }: { onClose: () => void }) {
   const cats = categoriesOf(libraryAssets()).filter((c) => c.name);
   return (
     <Modal
-      title="Create marketplace set"
+      title="Custom store set"
       onClose={onClose}
       width={520}
       footer={
@@ -255,7 +255,8 @@ function MarketplaceDialog({ onClose }: { onClose: () => void }) {
           </button>
           <button
             className="btn primary"
-            disabled={!n}
+            disabled={!n || !(o.hero || o.cover || o.catalog || o.categories)}
+            title={!n ? 'Import assets first' : !(o.hero || o.cover || o.catalog || o.categories) ? 'Tick at least one page' : undefined}
             onClick={() => {
               createMarketplaceSet(o);
               onClose();
@@ -284,8 +285,8 @@ function MarketplaceDialog({ onClose }: { onClose: () => void }) {
         )}
         <Check checked={o.cover} onChange={(cover) => setO({ ...o, cover })} label={<b>Square cover — 1080×1080</b>} />
         <Check checked={o.catalog} onChange={(catalog) => setO({ ...o, catalog })} label={<b>Full catalog — 3000×3000 (all {n} assets)</b>} />
-        <Check checked={o.categories} onChange={(categories) => setO({ ...o, categories })} label={<b>Category previews — one 1920×1080 page per category ({cats.length})</b>} />
-        <div className="hint">Pages share the same asset library. Everything stays editable afterwards; export them all at once with Export → all pages.</div>
+        <Check checked={o.categories} onChange={(categories) => setO({ ...o, categories })} label={<b>Category pages — one 1920×1080 page per category ({cats.length})</b>} />
+        <div className="hint">All pages use this page’s background and the same title style, so the set reads as one design. Everything stays editable afterwards; export them all at once with Export → all pages.</div>
       </div>
     </Modal>
   );

@@ -1507,7 +1507,7 @@ export function createMarketplaceSet(o: MarketplaceOptions) {
   const bg = bg0.type === 'transparent' ? BACKGROUND_PRESETS[4].bg() : bg0;
   const pages = buildStoreSetPages(all, o, bg, Math.floor(Math.random() * 1e6));
   if (!pages.length) return toast('Choose at least one page to create', 'warning');
-  addPages(pages, 'Create marketplace set');
+  addPages(pages, 'Custom store set');
   guideAction('storeset');
   toast(`Created ${pages.length} page${pages.length > 1 ? 's' : ''}`, 'success');
 }

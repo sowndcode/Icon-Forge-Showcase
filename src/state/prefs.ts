@@ -68,6 +68,8 @@ export interface Prefs {
   reduceMotion: boolean;
   /** Clicking a template adds a new page, or rebuilds the page you are on. */
   templateTarget: 'new' | 'replace';
+  /** Templates tab: put the templates that suit the pack first and label how well each fits. */
+  smartTemplates: boolean;
   /** Tile size in the Import screen's asset grid (px). */
   importTileSize: number;
   /** Starred items per library (ids: theme ids, background names, template ids). */
@@ -153,6 +155,7 @@ const DEFAULTS: Prefs = {
   defaultFont: 'Segoe UI Black',
   reduceMotion: false,
   templateTarget: 'new',
+  smartTemplates: true,
   importTileSize: 150,
   favorites: { themes: [], backgrounds: [], templates: [], elements: [], watermarks: [] },
   recents: { themes: [], backgrounds: [], templates: [], elements: [], watermarks: [] },
@@ -197,6 +200,7 @@ function normalize(p: Partial<Prefs>): Prefs {
     tours: { ...p.tours },
     guideProgress: p.guideProgress && typeof p.guideProgress === 'object' ? { ...p.guideProgress } : {},
     wmDefaults: { ...DEFAULTS.wmDefaults, ...p.wmDefaults },
+    smartTemplates: p.smartTemplates !== false,
     recentView: p.recentView === 'compact' ? 'compact' : 'grid',
     recentCollapsed: p.recentCollapsed === true,
   };

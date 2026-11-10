@@ -326,6 +326,9 @@
 .tpl-mini-prev .ratio > div, .tpl-card .ratio > div, .home-card.tpl .ratio > div { background: var(--bg-3); border: 1px solid var(--line-3); border-radius: var(--radius-xs); }
 .tpl-mini b { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 4px; }
 .tpl-mini small { font-size: 11px; color: var(--text-3); padding: 0 4px; font-family: var(--mono); }
+.tpl-fit { display: inline-flex; align-items: center; gap: 5px; padding: 1px 4px 0; font-size: 11px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tpl-fit::before { content: ''; flex: none; width: 6px; height: 6px; border-radius: 50%; background: #3fb950; }
+.tpl-fit.adjust::before { background: #d29922; }
 .tpl-list { display: flex; flex-direction: column; gap: 6px; padding: 4px 12px 8px; }
 .tpl-card { border-radius: 10px; background: var(--bg-2); padding: 8px; cursor: pointer; display: flex; gap: 12px; align-items: center; border: 1px solid var(--line); transition: border-color var(--dur-fast) var(--ease); }
 .tpl-card:hover { border-color: var(--line-3); }

@@ -23,7 +23,7 @@ type Cat = 'general' | 'projects' | 'appearance' | 'canvas' | 'layouts' | 'water
 
 /** Categories; `keys` are the settings a section reset restores (favourites and the like are kept). */
 const CATS: { id: Cat; label: string; icon: typeof Palette; keys?: (keyof Prefs)[] }[] = [
-  { id: 'general', label: 'General', icon: Settings2, keys: ['newProjectSize', 'templateTarget', 'defaultFont', 'quickStartDismissed'] },
+  { id: 'general', label: 'General', icon: Settings2, keys: ['newProjectSize', 'templateTarget', 'smartTemplates', 'defaultFont', 'quickStartDismissed'] },
   { id: 'projects', label: 'Projects & autosave', icon: Save, keys: ['startScreen', 'autosaveDelay'] },
   { id: 'appearance', label: 'Appearance', icon: Palette, keys: ['theme', 'accent', 'pasteboard', 'uiScale', 'thumbSize'] },
   { id: 'canvas', label: 'Canvas & guides', icon: Magnet, keys: ['snap', 'guideColor', 'nudge', 'overlays', 'pixelIcons'] },
@@ -213,6 +213,9 @@ function General() {
         </Row>
         <Row label="Clicking a template" hint="Add it as a new page, or rebuild the page you are on (Ctrl+Z undoes it).">
           <Seg small value={p.templateTarget} onChange={(templateTarget) => p.setPrefs({ templateTarget })} options={[{ value: 'new', label: 'New page' }, { value: 'replace', label: 'Replace this page' }]} />
+        </Row>
+        <Row label="Smart template recommendations" hint="Lists the templates that suit your pack first and labels how well each fits. Every template stays available; turn this off for the plain order." keywords="recommend fit suggest sort order compatibility">
+          <Toggle checked={p.smartTemplates} onChange={(smartTemplates) => p.setPrefs({ smartTemplates })} />
         </Row>
         <Row label="Font for new text" hint="Used when you add plain text with the T tool. Styled presets keep their own font.">
           <select className="input sm" style={{ width: 220 }} value={p.defaultFont} onChange={(e) => p.setPrefs({ defaultFont: e.target.value })}>

@@ -210,7 +210,13 @@ function VirtualTiles({
   const [box, setBox] = useState({ w: 280, h: 400, top: 0 });
   useEffect(() => {
     const el = ref.current!;
-    const ro = new ResizeObserver(() => setBox((b) => ({ ...b, w: el.clientWidth, h: el.clientHeight })));
+    // tiles are laid out inside the grid's side padding, so that is the width to divide — using the
+    // full client width pushed the last column under the panel's edge
+    const inner = () => {
+      const cs = getComputedStyle(el);
+      return el.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
+    };
+    const ro = new ResizeObserver(() => setBox((b) => ({ ...b, w: inner(), h: el.clientHeight })));
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
