@@ -2,17 +2,15 @@
 // recommended settings: perspective hero, square cover, full catalog and one page per category.
 
 import { guideAction } from './guideProgress';
-import { buildCatalogPages, DEFAULT_CATALOG } from '../core/catalog';
 import { BACKGROUND_PRESETS } from '../core/defaults';
-import type { Background, Page } from '../core/types';
-import { runLayout } from '../layout/run';
-import { commit, getAsset, getDoc, useDoc } from './doc';
-import { BUILTIN_TEMPLATES, libraryAssets, packNameGuess, pickRandom, sortForCatalog } from './generators';
+import type { Background } from '../core/types';
+import { commit, getDoc, useDoc } from './doc';
+import { buildStoreSetPages, libraryAssets, packNameGuess } from './generators';
 import { renameProject } from './project';
 import { fitView, setStage, toast, useUI } from './ui';
 
 /** Recommended perspective style for the hero: biggest assets in front, nothing overlapping. */
-export const THE_ONE_HERO_STYLE = { arrange: 'organic', rowSort: 'sizeFront', noOverlap: true, near: 1.35, far: 0.38, randPos: 0.12, randScale: 0.06, randRot: 0, density: 0.9 };
+export { STORE_HERO_STYLE as THE_ONE_HERO_STYLE } from './generators';
 
 let armedUntil = 0;
 /** Run The One automatically after the next import finishes (used when there are no assets yet). */
@@ -68,42 +66,9 @@ export async function runTheOne() {
   try {
     const pack = packNameGuess();
     const bg = heroBackground();
-    const seed = Math.floor(Math.random() * 1e6);
-    const tpl = (id: string) => BUILTIN_TEMPLATES.find((t) => t.id === id)!;
-    const pages: Page[] = [];
-
-    // 1 · Hero 1920×1080 — perspective floor, balanced pick across categories
-    let hero = tpl('perspective').build(pickRandom(all, Math.min(60, all.length), 'equal', seed), pack, structuredClone(bg));
-    const inst = hero.layouts[0];
-    if (inst) {
-      const styled = { ...inst, params: { ...inst.params, ...THE_ONE_HERO_STYLE } };
-      hero = runLayout({ ...hero, layouts: [styled] }, styled, { getAsset });
-    }
-    hero.name = 'Hero';
-    hero.exportName = 'hero';
-    pages.push(hero);
-
-    // 2 · Square cover 1080×1080 — hero composition
-    const cover = tpl('square').build(pickRandom(all, Math.min(24, all.length), 'equal', seed + 1), pack, structuredClone(bg));
-    cover.name = 'Cover';
-    cover.exportName = 'cover';
-    pages.push(cover);
-
-    // 3 · Full catalog 3000×3000 — every asset, numbered, grouped by category
-    const catalog = buildCatalogPages(sortForCatalog(all), { ...DEFAULT_CATALOG, title: `${pack} — ${all.length} assets` }, { w: 3000, h: 3000 }, BACKGROUND_PRESETS[4].bg());
-    catalog.forEach((p, i) => (p.exportName = catalog.length > 1 ? `catalog_${i + 1}` : 'catalog'));
-    pages.push(...catalog);
-
-    // 4 · One preview page per category
     const cats = [...new Set(all.map((a) => a.category))].filter(Boolean);
-    if (cats.length > 1) {
-      for (const cat of cats) {
-        const p = tpl('category').build(all.filter((a) => a.category === cat), pack, structuredClone(bg));
-        p.name = cat;
-        p.exportName = cat.toLowerCase().replace(/\s+/g, '_');
-        pages.push(p);
-      }
-    }
+    // hero 1920×1080 (balanced pick across categories), square cover, full catalog, a page per category
+    const pages = buildStoreSetPages(all, { pack, hero: true, heroLayout: 'floor', heroCount: 60, cover: true, catalog: true, categories: cats.length > 1, balanced: true }, bg, Math.floor(Math.random() * 1e6));
 
     // replace empty pages, otherwise add after the existing ones
     commit('Complete store set', (d) => {

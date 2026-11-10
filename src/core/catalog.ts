@@ -35,7 +35,7 @@ export const CATALOG_STYLES: { name: string; settings: Partial<CatalogSettings>;
 ];
 
 /** Rough brightness of a background, to pick a readable title color. */
-function isLightBackground(bg: Background): boolean {
+export function isLightBackground(bg: Background): boolean {
   const hex = bg.type === 'solid' || bg.type === 'image' ? bg.color : bg.gradient.stops[0]?.color ?? bg.color;
   const m = /^#?([0-9a-f]{6})$/i.exec(hex ?? '');
   if (!m) return false;
@@ -142,9 +142,11 @@ export function buildCatalogPages(assets: AssetRecord[], s: CatalogSettings, siz
     const style = s.cellStyle ?? (s.cellBackground ? 'soft' : 'none');
     const headerColor = s.headerColor ?? '#ffffff';
     if (s.title) {
-      objects.push(createText(s.title, W / 2, s.margin + titleH * 0.32, { fontSize: titleH * 0.56, align: 'center', fontFamily: 'Segoe UI Black', fontWeight: 900, fill: isLightBackground(bg) ? '#16181d' : '#ffffff' }));
+      // both lines get the full width between the margins: a short default box wrapped them
+      const wide = <T extends { w: number }>(t: T): T => ({ ...t, w: W - 2 * s.margin });
+      objects.push(wide(createText(s.title, W / 2, s.margin + titleH * 0.32, { fontSize: titleH * 0.56, align: 'center', fontFamily: 'Segoe UI Black', fontWeight: 900, fill: isLightBackground(bg) ? '#16181d' : '#ffffff' })));
       if (s.subtitle !== false)
-        objects.push(createText(`${assets.length} assets${chunks.length > 1 ? `  ·  page ${pi + 1} of ${chunks.length}` : ''}`, W / 2, s.margin + titleH * 0.78, { fontSize: titleH * 0.2, align: 'center', fontFamily: 'Segoe UI', fontWeight: 600, letterSpacing: titleH * 0.02, fill: s.labelColor, shadow: { enabled: false, color: '#000000', blur: 0, dx: 0, dy: 0, opacity: 0 } }));
+        objects.push(wide(createText(`${assets.length} assets${chunks.length > 1 ? `  ·  page ${pi + 1} of ${chunks.length}` : ''}`, W / 2, s.margin + titleH * 0.78, { fontSize: titleH * 0.2, align: 'center', fontFamily: 'Segoe UI', fontWeight: 600, letterSpacing: titleH * 0.02, fill: s.labelColor, shadow: { enabled: false, color: '#000000', blur: 0, dx: 0, dy: 0, opacity: 0 } })));
     }
     const groupId = uid('grp');
     const noShadow = { enabled: false, color: '#000000', blur: 0, dx: 0, dy: 0, opacity: 0 };
