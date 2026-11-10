@@ -39,7 +39,7 @@ Newer npm versions can skip Electron's download step during `npm ci`. `npm run a
 `Start Icon Forge Showcase.bat` fetch the runtime when it's missing; you can also run
 `node node_modules/electron/install.js` yourself.
 
-The README has a map of the source tree. Desktop-only code (file storage, dialogs, IPC) lives in
+[docs/development.md](docs/development.md) has a map of the source tree. Desktop-only code (file storage, dialogs, IPC) lives in
 `electron/`, and the interface reaches it only through the small API in `electron/preload.cjs`.
 
 ## Pull requests

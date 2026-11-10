@@ -6,6 +6,40 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Three templates:** Pack Contents (categories with their icon counts beside a grid), Light Spotlight
+  Cover (a bright itch.io cover with one featured icon) and Clean Story (a portrait for stories and reels).
+- **Ten palette themes** in a new *Palettes* section: Sage, Terracotta, Mint, Peach sorbet, Concrete,
+  Gunmetal, Bordeaux, Emerald, Sunset arcade and Swiss.
+- **Smart template recommendations:** templates that suit the pack (icon count, categories, chosen
+  format) are listed first in each section, with a quiet *Great fit* or *May need adjustments* label and
+  the reason in the tooltip. Nothing is hidden. Settings → General turns it off.
+
+### Changed
+
+- **Store sets look like one design.** Complete and Custom store set share one builder: the hero, cover,
+  catalog and category pages use the same title and subtitle styles and the same backdrop. Category
+  pages have even cells and cap icon size for small categories. The Custom store set hero uses the same
+  non-overlapping floor arrangement as Complete store set.
+- **Long pack names** shrink further before wrapping, break into two balanced lines where a template
+  has room, and every template except Tilted Wall Cover and Ribbon Cover gets a final pass that keeps
+  text inside its box.
+- Hero, ring and honeycomb templates no longer repeat the icon count in both the title and the pill.
+  Clean Grid Cover fills its space; demo titles clear the FREE DEMO seal.
+- The README is shorter; the feature list, storage details and development notes moved to `docs/`.
+
+### Fixed
+
+- Catalog titles and the asset count under them wrapped onto two lines in a box that was too short.
+- The asset library's last column was cut off by the panel edge.
+- Two categories whose names differ only in spacing or case could export to the same file name.
+
+### Security
+
+- **Template files are validated like share codes.** A `.showcase-template.json` was stored after a
+  shallow check; it is now size-limited and every field is checked and copied, as for share codes.
+
 ## [0.2.0-alpha.1] - Unreleased (not tagged yet)
 
 Everything below up to 0.1.0-alpha.1 is part of this version. This milestone's polish comes first.
