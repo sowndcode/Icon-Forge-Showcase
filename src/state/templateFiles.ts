@@ -2,10 +2,12 @@
 // computer or project, duplicate it for a variant.
 
 import { uid } from '../core/ids';
+import { MAX_TEMPLATE_FILE_BYTES, readTemplateFile } from '../core/shareCode';
 import type { StoredPreset } from '../core/types';
 import { chooseSaveTarget, writeTarget } from '../services/native';
 import { db } from '../services/db';
 import type { TemplateData } from './generators';
+import { KNOWN_ALGORITHMS } from './customPresets';
 import { refreshPresets } from './presets';
 import { toast } from './ui';
 
@@ -33,11 +35,6 @@ export async function exportTemplateFile(t: StoredPreset<TemplateData>) {
   toast(`Exported template “${t.name}”`, 'success');
 }
 
-function isTemplateFile(v: unknown): v is TemplateFile {
-  const f = v as TemplateFile;
-  return !!f && f.format === FORMAT && typeof f.name === 'string' && !!f.data?.page && Array.isArray(f.data.page.objects);
-}
-
 /** Ask for one or more template files and add them to “My templates”. */
 export function importTemplateFile() {
   const input = document.createElement('input');
@@ -48,12 +45,13 @@ export function importTemplateFile() {
     let ok = 0;
     for (const f of Array.from(input.files ?? [])) {
       try {
-        const v: unknown = JSON.parse(await f.text());
-        if (!isTemplateFile(v)) throw new Error('not a template file');
+        // a file from someone else is untrusted: size-limited, then validated field by field like a share code
+        if (f.size > MAX_TEMPLATE_FILE_BYTES) throw new Error('too large');
+        const v = readTemplateFile(JSON.parse(await f.text()), FORMAT, KNOWN_ALGORITHMS);
         await db.putPreset({ id: uid('tpl'), kind: 'template', name: v.name, createdAt: Date.now(), data: v.data });
         ok++;
       } catch {
-        toast(`“${f.name}” is not a Showcase template file`, 'error');
+        toast(`“${f.name}” is not a valid Showcase template file`, 'error');
       }
     }
     if (ok) {
