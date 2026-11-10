@@ -22,6 +22,7 @@ type Filter = 'all' | 'light' | 'dark' | 'fav';
 
 const THEME_GROUPS: { id: string; desc: string }[] = [
   { id: 'Professional', desc: 'Restrained type and calm backgrounds — product shots, UI kits, store pages' },
+  { id: 'Palettes', desc: 'Muted, pastel, industrial and deep premium colour schemes' },
   { id: 'Genres', desc: 'Fantasy, sci-fi, horror and other game genres' },
   { id: 'Seasons & events', desc: 'Winter, Halloween, Christmas, spring…' },
   { id: 'Styles', desc: 'Retro, cute, gothic, minimal and more' },
