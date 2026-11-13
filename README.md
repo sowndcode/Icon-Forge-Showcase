@@ -1,127 +1,71 @@
 # Icon Forge Showcase
 
-> **Status: Alpha.** Usable day to day, but expect rough edges, and back up anything important
-> (Ctrl+S saves a portable `.showcase` file).
+**Turn a folder of game icons into store-ready marketplace images.** Drop in your transparent PNGs and
+get itch.io covers, wide thumbnails, social posts, banners, free-demo covers and full catalogs,
+laid out for you and editable down to the last pixel.
 
-Icon Forge Showcase is a local desktop tool for turning a folder of transparent game assets (icons,
-items, sprites) into marketplace images: itch.io covers, wide thumbnails, social posts, banners, free-demo
-covers and full catalogs.
+It is a desktop app for Windows that works entirely offline: no account, no uploads, no telemetry.
 
-**Everything runs on your computer.** Images are decoded locally and saved as files in the `data` folder
-next to the app. There are no uploads, accounts, telemetry or AI services, and the desktop app blocks all
-network requests.
+> **Status: alpha.** Usable day to day, but expect rough edges. Keep `.showcase` backups of important
+> work (Ctrl+S saves one).
 
-## Development status
+![Templates filled with your own icons](docs/screenshots/templates.png)
 
-Icon Forge Showcase is in early alpha and is actively being developed. Features, menus and the look
-of the app still change from version to version.
+## What it does
 
-Your feedback shapes what comes next. If something breaks, feels confusing or is missing, please open
-an issue to report a bug or suggest a feature. Notes on how you use the app are welcome too.
+- **A whole store set in one click.** *Complete store set* builds a hero image, a square cover, a
+  numbered catalog and a page per category from your pack, in one consistent look. *Custom store set*
+  lets you choose the pages.
+- **71 templates that fill themselves in.** Covers, thumbnails, banners, social formats, free-demo
+  pages and catalogs, previewed with your own icons. The ones that suit your pack are listed first.
+- **35 layouts that understand your icons.** Grids, clusters, honeycombs, rings, perspective floors
+  and more, all arranged by each icon's *visible* pixels, not its file size.
+- **59 themes, plus themes made from your icons' colours,** with a contrast check so titles stay
+  readable on whatever is behind them.
+- **A real editor underneath.** Move, scale and rotate anything; add text, badges, shapes and
+  backgrounds; undo freely. Generated pages are ordinary pages.
+- **Clean exports.** PNG, WebP or JPEG at 1×, 2×, 4× or a custom scale, rendered fresh from your
+  original files, in batches with a naming pattern. Existing files are never overwritten.
+- **Review before you publish.** Platform crops, store-card mock-ups, an optional watermark and
+  composition warnings with one-click fixes.
 
-If the project grows an active community of users, a larger overhaul of templates, customization and
-layout flexibility is being considered. Nothing is scheduled yet, and there are no promised dates.
-
-## Features
-
-- **Import** files or whole folders (PNG, WebP, JPEG, AVIF, GIF, BMP). Subfolders become categories, and
-  auto-categorize suggests categories from file names. Alpha analysis finds each image's *visible* bounds,
-  which every layout, alignment tool and snap uses.
-- **Compose** on a canvas: move, scale, rotate, flip, group and lock objects; add text, shapes, guides,
-  a safe zone and a focal region that layouts keep clear. Smart guides appear while moving and resizing.
-- **35 smart layouts**, including grid, packed grid, honeycomb, masonry, rows, columns, circle, arc,
-  spiral, scatter, clusters, bands, edge frame, fan, pyramid, cascade, custom path, and perspective
-  layouts (endless floor, tilted wall, perspective floor and wall, and ground plane with icons lying
-  flat). Random layouts are seeded, and objects you move by hand are pinned. The picker has search,
-  favourites, recently used and live previews of your own icons.
-- **68 built-in templates** in groups: itch.io covers, clean & professional, wide thumbnails, square &
-  social, banners & headers, free demos, sales & comparisons, and catalogs (up to 4K). Templates can
-  follow a colour theme, including themes built from your icons' colours. Each template page keeps its
-  own options; changing one (for example Pixel → Pixel ++) changes only what it names. Right-click a
-  template to apply only its layout, background or text style.
-- **Themes:** 51 built-in themes (15 restrained professional ones) plus clean light, dark, soft, vivid,
-  warm and cool variants made from your icons' colours with readable contrast. Search, favourites,
-  recently used, a before/after preview, and apply to several selected pages at once.
-- **Local libraries:** your themes, backgrounds, templates and elements are kept on this computer and
-  available in every project; import them from another project's pages without changing it.
-- **My themes and Share Codes:** save a page's look as your own theme, and share custom themes and
-  templates as a short text code that others paste in (checked and previewed before it's added; no
-  images or personal data inside, works offline).
-- **60 canvas size presets** for itch.io, Steam, asset stores, social media and video.
-- **Text and badges:** titles, badges, labels and pixel-style text, with gradient fill, outlines, 3D
-  depth, glow, shadow and curved text. `{count}` in any text shows the current number of assets. Simple
-  mode offers coordinated looks and suggestions that read on the actual background, with a contrast
-  check and one-click fixes; Advanced mode has every control.
-- **Backgrounds:** solids, gradients, mesh blends, procedural patterns and spotlight glows, plus
-  backgrounds and themes matched to your assets.
-- **Image effects:** opacity, grayscale, glow and outline, and shapes that can affect what lies below them.
-- **Watermark:** a project watermark of text and logo layers (single, repeated or on each icon) drawn over
-  pages in Review and exports, never into them, with presets and smart placement.
-- **Review:** page by page at Fit, pixel-accurate 100% or thumbnail sizes, platform crops, store-card
-  mock-ups, clean / watermarked / side by side, and composition warnings with one-click fixes.
-- **Export:** PNG, WebP or JPEG at 1×, 2×, 4× or a custom scale. Each page is rendered fresh at the
-  target resolution from the original files. Batch export uses a naming pattern (`{project}`, `{page}`,
-  `{index}`, `{w}`, `{h}`, `{date}`, `{time}`), and existing files are never overwritten. The Export
-  workspace previews the exact output file, manages presets, and can save a clean and a watermarked
-  copy of each page.
-- **Projects:** new projects start with no assets (or reuse chosen assets from another saved project),
-  autosave, a project browser with search, pinning and multi-select, recovery from autosaves, a Trash for
-  deleted projects, and portable `.showcase` files (a zip of the project plus its original images and fonts).
-- **Assets:** large preview with zoom and file details, adjustable grid, filters by format, transparency
-  and size, and exact-duplicate detection by file content.
-- **Guide:** twelve interactive tutorials that point at the real controls, work offline and remember
-  where you stopped.
+The full list is in [docs/features.md](docs/features.md).
 
 ## Screenshots
 
-**Home:** your project library, recent work and new-project sizes.
-![Home](docs/screenshots/home.png)
+| | |
+| --- | --- |
+| ![Home](docs/screenshots/home.png) **Home:** projects, recent work, new-project sizes | ![Import](docs/screenshots/import.png) **Import:** bring in icons and sort them into categories |
 
-**Import:** bring in icons, sort them into categories.
-![Import](docs/screenshots/import.png)
-
-**Templates:** ready-made store covers, one click to apply.
-![Templates](docs/screenshots/templates.png)
-
-**Themes and layouts:** restyle a page and pick from dozens of layouts.
 ![Themes and layouts](docs/screenshots/themes-and-layouts.png)
+**Themes and layouts:** restyle a page and pick from dozens of layouts.
 
-## Install and run
+## Install
 
-Icon Forge Showcase runs on **Windows 10 or 11 (64-bit)**. This is the only platform it's developed
-and tested on. The code is cross-platform Electron, but other systems are untested.
+Icon Forge Showcase runs on **Windows 10 or 11 (64-bit)**, the only platform it is developed and
+tested on.
 
-There are two ways to get it:
+### Portable build
 
-| | Portable Windows build | From source |
-| --- | --- | --- |
-| For | Using the app | Developers, or trying the latest code |
-| You need | Nothing else installed | Node.js and npm |
-| Available | Only when a release on the [Releases page](https://github.com/sowndcode/Icon-Forge-Showcase/releases) includes a ZIP | Always |
+If the [Releases page](https://github.com/sowndcode/Icon-Forge-Showcase/releases) lists a release
+with a `.zip` under **Assets**:
 
-### Option 1: portable Windows build
+1. Download the ZIP and extract it to a folder you can write to, such as
+   `Documents\Icon Forge Showcase`. Avoid `C:\Program Files` and don't run it from inside the ZIP:
+   projects are saved in a `data` folder next to the app.
+2. Double-click **`IconForgeShowcase.exe`**.
+3. The builds are not code-signed, so Windows SmartScreen may say *"Windows protected your PC"*.
+   Choose **More info**, then **Run anyway**. Only do this for a ZIP downloaded from this
+   repository's Releases page.
 
-Use this if the [Releases page](https://github.com/sowndcode/Icon-Forge-Showcase/releases) lists a
-release with a `.zip` file under **Assets**. If no release has a ZIP yet, use Option 2.
+Nothing else needs to be installed. To remove the app, delete its folder, which also deletes the
+projects in `data`, so back up what you want to keep first.
 
-1. Download the `.zip` file from the release's **Assets**.
-2. Right-click the ZIP and choose **Extract All…**. Extract it to a folder you can write to, such as
-   `Documents\Icon Forge Showcase`. Don't run the app from inside the ZIP, and avoid `C:\Program Files`:
-   the app saves your projects in a `data` folder next to `IconForgeShowcase.exe`.
-3. Open the extracted folder and double-click **`IconForgeShowcase.exe`**.
-4. The builds are not code-signed, so Windows SmartScreen may say *"Windows protected your PC"*. Choose
-   **More info**, then **Run anyway**. Only do this for a ZIP downloaded from this repository's Releases page.
+### From source
 
-No installer, Node.js or internet connection is needed. To remove the app, delete the folder (this also
-deletes the projects in its `data` folder, so export or back up anything you want to keep first).
-
-### Option 2: from source
-
-You need:
-
-- **Node.js 20.19+ or 22.12+** with npm ([nodejs.org](https://nodejs.org/), LTS recommended).
-- About 500 MB of disk space for dependencies (mostly the Electron runtime), plus space for your projects.
-- An internet connection for the first install only. The app itself works fully offline.
+If no release has a ZIP yet, or you want the latest code. You need
+[Node.js](https://nodejs.org/) 20.19+ or 22.12+ and about 500 MB of disk space. An internet
+connection is needed for the first install only.
 
 ```bash
 git clone https://github.com/sowndcode/Icon-Forge-Showcase.git
@@ -130,106 +74,53 @@ npm ci
 npm run app
 ```
 
-`npm run app` downloads the Electron runtime if npm skipped it, builds the interface when the sources
-changed, and opens the desktop app. Afterwards you can also start it by double-clicking
-**`Start Icon Forge Showcase.bat`** in the folder, which runs the same steps (and `npm ci` too, if needed).
+Afterwards you can also start it with **`Start Icon Forge Showcase.bat`**. To update, run `git pull`
+and then `npm ci`; your `data/` folder is never touched by Git.
 
-To update, run `git pull` and then `npm ci`. Your `data/` folder is never touched by Git.
+## Your data stays on your computer
 
-Other commands:
+- **Offline by design.** Images are decoded locally, and the desktop app blocks all network
+  requests. There are no accounts, telemetry, cloud or AI services.
+- **Plain files next to the app.** Projects, original images, autosaves and settings live in the
+  `data` folder beside the executable, so the whole app can be moved or backed up as one folder.
+- **Hard to lose work.** Projects autosave with earlier versions kept, damaged files are set aside
+  rather than deleted, and deleted projects go to a Trash you can restore from.
+- **Careful with files from others.** Share codes, template files and `.showcase` projects are
+  validated before anything is added.
 
-| Command | What it does |
-| --- | --- |
-| `npm run dev` | Interface in a browser at http://localhost:5183 (uses the browser's storage, not `data/`) |
-| `npm test` | Unit tests (Vitest) |
-| `npm run typecheck` | TypeScript checks |
-| `npm run build` | Typecheck and production build of the interface into `dist/` |
-
-To build the portable Windows folder yourself, run `build_exe.bat` (or `npm run package`). It makes an
-unsigned `release\IconForgeShowcase-win32-x64\` folder for personal use; it's not an official release.
-Versions, the release checklist and how to update an installed copy are in [RELEASING.md](RELEASING.md).
-
-Development checks beyond `npm test` (they use Playwright from a global installation and a freshly
-started `npm run dev`): `node tests/e2e/run.mjs` (Review, import dialog and Export workflows),
-`node tests/e2e/audit-templates.mjs` (every template under several themes, with a readability check),
-`node tests/e2e/settings.mjs` (every Settings page), and `node bench/run.mjs` (layout and rendering
-performance, see [docs/performance.md](docs/performance.md)).
-
-## Where your data is saved
-
-Everything the app manages stays inside its own folder. Paths are worked out from the app's location,
-so the folder can be moved or renamed (spaces are fine). `data/` and `exports/` are never committed to Git.
-
-```
-data/
-  projects/<id>/        each project (project.json, written atomically; meta.json = list info)
-  projects/_files/      original imported images and fonts
-  autosaves/<id>/       earlier versions of each project (last 10, at least 3 min apart, kept 30 days)
-  trash/projects/       deleted projects with their images, until you empty the Trash
-  trash/files/          single images removed from a project (kept 30 days so Undo can restore them)
-  settings/             preferences, app state, presets, window position
-  cache/                browser engine cache; safe to delete
-  logs/                 main.log (rotated at 1 MB, kept 30 days; your home folder is shown as ~)
-  migration/            report of data moved from earlier versions
-exports/                default folder for save dialogs (you can choose any other folder)
-```
-
-- **Damaged files** are never deleted: they're renamed to `*.corrupt-<time>.json`, and the newest autosave
-  is used instead.
-- **Deleting a project** moves it, with its images, to the Trash (Settings → Storage → Trash). You can
-  restore it from there; only **Delete permanently** or **Empty Trash** erases it, and both ask first.
-- **Updating:** copy the new release over the old app folder (a release never contains `data/`), or
-  extract it elsewhere: a new copy with no projects finds the projects of an earlier copy on this
-  computer and offers to copy them. The earlier folder is only read. Don't delete an old folder before
-  the new copy shows your projects.
-- **Upgrading from versions before the file-based storage** (the app was called Asset Forge Showcase then), which kept data in
-  `%APPDATA%\asset-forge-showcase`: the first start copies that data into `data/` and writes
-  `data/migration/report.txt`. The original folder is left untouched.
-
-## Project structure
-
-```
-electron/      desktop shell: main.cjs (window, app:// protocol, network block, dialogs, IPC),
-               store.cjs (files in data/), migrate.cjs, paths.cjs, log.cjs, preload.cjs (the only bridge)
-src/core/      document types, geometry, alpha analysis, collision, align/snap, palettes, catalog, warnings
-src/layout/    layout plug-ins (one LayoutAlgorithm each), the registry and run.ts (pinning, slots, focal area)
-src/render/    the shared renderer (editor and export), text layout, image cache
-src/services/  storage, migration, analysis workers, exporter, file input/output
-src/state/     zustand stores (document with undo history, UI, preferences) and actions by area
-src/ui/        React interface: canvas editor, panels, dialogs, views
-tests/         Vitest unit tests
-scripts/       build helpers (ensure-build, packaging)
-```
-
-To add a layout, write a `LayoutAlgorithm` (parameters plus a pure `run(items, params, ctx)` that
-returns visible-box placements) and register it in `src/layout/registry.ts`.
+Details: [docs/data-and-storage.md](docs/data-and-storage.md) for the folder layout, recovery and
+updating, [SECURITY.md](SECURITY.md) for reporting a problem.
 
 ## Known limitations
 
-- **Alpha:** the project file format may still change. Old projects are migrated when it does, but keep
+- **Alpha:** the project format may still change. Old projects are migrated when it does, but keep
   `.showcase` backups of important work.
-- **Windows only** so far (see [Install and run](#install-and-run)).
-- **Fonts:** templates use fonts installed with Windows (e.g. Segoe UI, Bahnschrift, Impact). Other systems
-  substitute similar fonts, so layouts can look different. Custom fonts can be imported per project.
+- **Windows only.** The code is cross-platform Electron, but other systems are untested.
+- **Fonts:** templates use fonts installed with Windows (Segoe UI, Bahnschrift, Impact…). Other
+  systems substitute similar fonts, so layouts can look different. Custom fonts can be imported per
+  project.
 - **The app folder must be writable.** If it isn't, the app warns you and saves to your user profile
   for that session.
-- **Dev mode uses separate storage:** `npm run dev` in a browser uses the browser's own storage, not `data/`.
-- **No auto-update and no signed builds.** Windows SmartScreen may warn the first time you start a
-  downloaded build; updating means downloading the new ZIP (see [RELEASING.md](RELEASING.md)).
+- **No auto-update and no signed builds.** Updating means downloading the new ZIP; see
+  [RELEASING.md](RELEASING.md).
 
-## Contributing
+## Development and contributing
 
-Bug reports, ideas and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
+The project is in active development, and feedback shapes what comes next: bug reports, ideas and
+pull requests are welcome.
 
-- **Bugs:** open an issue with the *Bug report* template. Include your Windows version, steps to reproduce,
-  and the relevant lines from `data/logs/main.log`. Check them for anything private first.
-- **Security problems:** please don't open a public issue. See [SECURITY.md](SECURITY.md).
+- [docs/development.md](docs/development.md): commands, checks and a map of the source tree.
+- [CONTRIBUTING.md](CONTRIBUTING.md): how to report a bug or propose a change.
+- [CHANGELOG.md](CHANGELOG.md): what changed in each version.
 
-## Support the Project
+Please report security problems privately, as described in [SECURITY.md](SECURITY.md), not in a
+public issue.
 
-If you find Icon Forge Showcase useful and would like to support its development, feel free to check out my [itch.io page](https://sownddddd.itch.io/).
+## Support the project
+
+If you find Icon Forge Showcase useful and would like to support its development, have a look at my
+[itch.io page](https://sownddddd.itch.io/).
 
 ## License
 
 [MIT](LICENSE). Third-party components are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-

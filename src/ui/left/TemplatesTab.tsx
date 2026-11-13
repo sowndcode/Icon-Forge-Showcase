@@ -13,6 +13,7 @@ import { copyShareCode, duplicatePreset, renamePreset, updatePresetData, useCust
 import { deletePreset, usePresets } from '../../state/presets';
 import { usePrefs } from '../../state/prefs';
 import { rebasePalette } from '../../core/palette';
+import { FIT_LABEL, sortByFit, templateFit, type FitContext } from '../../core/templateFit';
 import { exportTemplateFile, importTemplateFile } from '../../state/templateFiles';
 import { openDialog, useUI, type ContextMenuItem } from '../../state/ui';
 import type { StoredPreset } from '../../core/types';
@@ -50,6 +51,13 @@ export function TemplatesTab() {
   const optsKey = `${ui.text}|${ui.icons}|${theme?.id ?? ''}|${ui.themeParts}|${ui.size}|${base?.colors.join('') ?? ''}`;
   const liveTpl = isLiveTemplate(page) ? BUILTIN_TEMPLATES.find((t) => t.id === page.fromTemplate!.id) : undefined;
   const knownLook = ui.themeId === 'auto' || ui.themeId === 'none' || allThemes.some((t) => t.id === ui.themeId);
+  // smart recommendations (Settings ▸ General): what a template would be built with decides its fit
+  const smart = usePrefs((s) => s.smartTemplates);
+  const fitCtx = useMemo((): FitContext => {
+    const list = nAssets ? workingAssets() : [];
+    return { count: list.length, categories: new Set(list.map((a) => a.category).filter(Boolean)).size, size: fmt ? { w: fmt.w, h: fmt.h } : undefined };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nAssets, sel, fmt?.w, fmt?.h]);
   const favs = useFavorites('templates');
   const recents = useRecents('templates');
   const [q, setQ] = useState('');
@@ -108,11 +116,12 @@ export function TemplatesTab() {
 
   const builtTile = (t: TemplateDef, i: number) => {
     const s = builtin(t);
+    const fit = smart ? templateFit(t, fitCtx) : null;
     return (
       <div key={t.id} className={`tpl-mini-wrap ${favs.has(t.id) ? 'is-fav' : ''}`}>
         <button
           className="tpl-mini"
-          title={`${t.name} — ${t.description}\nClick: ${target === 'new' ? 'add as a new page' : 'replace this page'} · right-click: layout, background or text style only`}
+          title={`${t.name} — ${t.description}${fit ? `\n${FIT_LABEL[fit.level]}: ${fit.reason}` : ''}\nClick: ${target === 'new' ? 'add as a new page' : 'replace this page'} · right-click: layout, background or text style only`}
           onClick={() => run(s, 'pref')}
           onContextMenu={(e) => {
             e.preventDefault();
@@ -130,6 +139,11 @@ export function TemplatesTab() {
           </div>
           <b>{t.name}</b>
           <small>{fmt ? `${fmt.w} × ${fmt.h}` : `${t.w} × ${t.h}`}</small>
+          {fit && fit.level !== 'good' && (
+            <span className={`tpl-fit ${fit.level}`} title={fit.reason}>
+              {FIT_LABEL[fit.level]}
+            </span>
+          )}
         </button>
         <button className={`tile-star ${favs.has(t.id) ? 'on' : ''}`} title={favs.has(t.id) ? 'Remove from favourites' : 'Add to favourites'} aria-label={favs.has(t.id) ? 'Remove from favourites' : 'Add to favourites'} aria-pressed={favs.has(t.id)} onClick={() => favs.toggle(t.id)}>
           <Star size={12} />
@@ -164,7 +178,7 @@ export function TemplatesTab() {
     <div className="panel-body">
       <Fold id="tpl-tools" title="Production tools" desc="Whole sets, catalogs, variations and comparisons in one step">
         <div style={{ padding: '0 6px' }}>
-          <ToolBtn icon={<Store size={14} />} label="Create Marketplace Set…" note="hero · cover · catalog" onClick={() => openDialog('marketplace')} />
+          <ToolBtn icon={<Store size={14} />} label="Custom Store Set…" note="hero · cover · catalog" onClick={() => openDialog('marketplace')} />
           <ToolBtn icon={<LayoutGrid size={14} />} label="Generate Catalog…" note="numbered grid" onClick={() => openDialog('catalog')} />
           <ToolBtn icon={<Layers3 size={14} />} label="Category Showcase…" note="page per category" onClick={() => openDialog('categoryShowcase')} />
           <ToolBtn icon={<Replace size={14} />} label="Replace Asset Set…" note="reuse a composition" onClick={() => openDialog('replaceSet')} />
@@ -352,7 +366,8 @@ export function TemplatesTab() {
         </Fold>
       )}
       {TEMPLATE_GROUPS.map((g, gi) => {
-        const list = builtShown.filter((t) => templateGroup(t) === g.id);
+        const inGroup = builtShown.filter((t) => templateGroup(t) === g.id);
+        const list = smart ? sortByFit(inGroup, fitCtx) : inGroup;
         if (!list.length) return null;
         return (
           <Fold key={g.id} id={`tplg-${g.id}`} title={g.id} count={list.length} desc={g.desc} defaultOpen={gi === 0 || !!needle || filter === 'fav'}>

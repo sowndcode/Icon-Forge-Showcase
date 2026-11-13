@@ -404,6 +404,24 @@ function readItem(r: Record<string, unknown>, kind: ShareKind, knownAlgorithms: 
   return { kind, name: itemName, data: { page }, notes };
 }
 
+/** Largest template file worth reading (the same ceiling a share code unpacks to). */
+export const MAX_TEMPLATE_FILE_BYTES = MAX_JSON_BYTES;
+
+/**
+ * A template file (.showcase-template.json) from someone else, checked exactly like a share code:
+ * every field is validated and copied, unknown fields are dropped, sizes and nesting are limited.
+ * Throws ShareCodeError for anything that is not a well-formed template.
+ */
+export function readTemplateFile(raw: unknown, format: string, knownAlgorithms: ReadonlySet<string>): { name: string; data: CustomTemplateData } {
+  depthCheck(raw, 0);
+  if (!isObj(raw) || raw.format !== format || !isObj(raw.data)) fail('This is not a Showcase template file');
+  const r = raw as Record<string, unknown>;
+  const page = templatePage(knownAlgorithms)((r.data as Record<string, unknown>).page, 'template');
+  // images belong to the project the template came from
+  if (page.background.type === 'image') page.background = { ...page.background, type: 'solid' };
+  return { name: name(r.name, 'name'), data: { page } };
+}
+
 function depthCheck(v: unknown, d: number) {
   if (d > MAX_DEPTH) fail('The code is damaged (nested too deeply)');
   if (Array.isArray(v)) for (const x of v) depthCheck(x, d + 1);

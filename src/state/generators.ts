@@ -2,7 +2,7 @@
 // random selection, template slots and Replace Asset Set.
 
 import { guideAction } from './guideProgress';
-import { buildCatalogPages, DEFAULT_CATALOG } from '../core/catalog';
+import { buildCatalogPages, CATALOG_STYLES, DEFAULT_CATALOG, isLightBackground } from '../core/catalog';
 import { BACKGROUND_PRESETS, CANVAS_PRESETS, presetName, createPage, createShape, createText, grad, scaleTextStyle, TEXT_PRESETS, withLight, withPattern } from '../core/defaults';
 import { naturalWidth, textHeight } from '../render/text';
 import { apportion } from '../layout/common';
@@ -99,15 +99,30 @@ function defaultPresetData(algorithm: string): LayoutPresetData {
   return { algorithm, params: {}, seed: Math.floor(Math.random() * 1e6), overlap: alg.defaultOverlap ?? 'strict', maxOverlap: 0.3, avoidFocal: true, respectSafe: true };
 }
 
-/** Centered title that stays on one line: the font shrinks (down to 55%) until it fits `widthFrac` of the page. */
-function titleText(page: Page, text: string, y: number, size: number, extra: Parameters<typeof createText>[3] = {}, widthFrac = 0.86) {
-  const t = createText(text, page.width / 2, y, { fontSize: size, ...extra });
+/**
+ * Centered title that stays on one line: the font shrinks (down to 40%) until it fits `widthFrac` of
+ * the page. With `lines` 2, a name that would shrink below 60% breaks into two balanced lines instead,
+ * which keeps about the same height as the one-line title and stays far more readable.
+ */
+function titleText(page: Page, text: string, y: number, size: number, extra: Parameters<typeof createText>[3] = {}, widthFrac = 0.86, lines: 1 | 2 = 1) {
+  let t = createText(text, page.width / 2, y, { fontSize: size, ...extra });
   const maxW = page.width * widthFrac;
-  const natural = naturalWidth(text, t.style) + t.style.fontSize * 0.2;
-  if (natural > maxW) {
-    const k = Math.max(0.55, maxW / natural);
-    t.style = { ...t.style, fontSize: t.style.fontSize * k, letterSpacing: t.style.letterSpacing * k, stroke: { ...t.style.stroke, width: t.style.stroke.width * k } };
+  const widthOf = (s: string) => Math.max(...s.split('\n').map((l) => naturalWidth(l, t.style))) + t.style.fontSize * 0.2;
+  let natural = widthOf(text);
+  let cap = 1;
+  if (lines === 2 && natural * 0.6 > maxW && !text.includes('\n') && text.includes(' ')) {
+    const words = text.split(' ');
+    let best = text;
+    for (let i = 1; i < words.length; i++) {
+      const two = `${words.slice(0, i).join(' ')}\n${words.slice(i).join(' ')}`;
+      if (widthOf(two) < widthOf(best)) best = two;
+    }
+    t = { ...t, text: best, style: { ...t.style, lineHeight: Math.min(t.style.lineHeight, 1) } };
+    natural = widthOf(best);
+    cap = 0.6;
   }
+  const k = Math.max(0.4, Math.min(cap, maxW / natural));
+  if (k < 1) t.style = { ...t.style, fontSize: t.style.fontSize * k, letterSpacing: t.style.letterSpacing * k, stroke: { ...t.style.stroke, width: t.style.stroke.width * k } };
   t.w = maxW;
   t.h = textHeight(t);
   return t;
@@ -124,6 +139,39 @@ function presetText(name: string, text: string, x: number, y: number, k = 1) {
 
 /** "{count}" when the template uses the whole library (stays correct as assets are added), else the number. */
 const countToken = (assets: AssetRecord[]) => (assets.length && assets.length === libraryAssets().length ? '{count}' : String(assets.length || 100));
+
+/** The line under a title: spaced small caps in the accent gold (themes give it their own colour). */
+const SUBLINE = (k: number): Parameters<typeof createText>[3] => ({ fontFamily: 'Bahnschrift', fontWeight: 600, letterSpacing: 6 * k, fill: '#f5c542' });
+
+/** Same-size quiet cells behind a grid of icons, so mixed icon shapes still read as one tidy sheet. */
+function evenCells(p: Page, opacity = 0.05): Page {
+  const inst = p.layouts[0];
+  if (!inst?.slots.length) return p;
+  const s = Math.max(...inst.slots.map((sl) => Math.max(sl.w, sl.h))) * 1.26;
+  const cells = inst.slots.map((sl, i) => createShape('rect', sl.cx, sl.cy, s, s, { fill: '#ffffff', opacity, radius: s * 0.14, strokeWidth: 0, name: `Cell ${i + 1}` }));
+  return { ...p, objects: [...cells, ...p.objects] };
+}
+
+/**
+ * One category of the pack: its name, a line saying which pack and how many, and the icons in a
+ * grid of even cells. A handful of icons stay a sensible size; hundreds still fit. Used by the
+ * Category Preview template, Category Showcase and the store sets, so they all match.
+ */
+export function buildCategoryPage(list: AssetRecord[], cat: string, pack: string, bg: Background, size = { w: 1920, h: 1080 }, algorithm = 'grid'): Page {
+  const { w, h } = size;
+  const k = Math.min(w, h) / 1080;
+  let p = createPage(cat || 'Uncategorized', w, h, bg);
+  p.safeZone = { enabled: true, top: 23, right: 5, bottom: 6, left: 5 };
+  const n = list.length;
+  p.objects = [
+    titleText(p, (cat || 'Uncategorized').toUpperCase(), h * 0.1, 96 * k, { stroke: { enabled: true, color: '#111318', width: 8 * k } }, 0.86, 2),
+    titleText(p, `${pack} · ${n} ${n === 1 ? 'icon' : 'icons'}`.toUpperCase(), h * 0.175, 30 * k, SUBLINE(k)),
+  ];
+  if (algorithm !== 'grid') return placeAssets(p, list, { algorithm }, 0.12);
+  const gap = (n > 60 ? 12 : 22) * k;
+  p = placeAssets(p, list, { algorithm: 'grid', params: { gapX: gap, gapY: gap, padding: 0, fill: 0.76, maxCell: 0.42 } }, 0.12);
+  return evenCells(p);
+}
 
 export interface TemplateDef {
   id: string;
@@ -257,7 +305,7 @@ const SIZE_KEYS = ['size', 'fill', 'density', 'scale', 'supportScale', 'heroScal
 function fitTextsToBoxes(p: Page): Page {
   let changed = false;
   const objects = p.objects.map((o): SceneObject => {
-    if (o.type !== 'text' || o.style.curve) return o;
+    if (o.type !== 'text' || o.style.curve || o.groupId) return o;
     const lines = o.text.replace(/\{count\}/g, '000').split('\n');
     const pad = o.style.badge?.enabled ? 0 : o.style.fontSize * 0.1;
     const natural = Math.max(...lines.map((l) => naturalWidth(l, o.style))) + pad;
@@ -424,7 +472,7 @@ function cardCover(assets: AssetRecord[], pack: string, bg: Background, w: numbe
   let p = createPage('Card grid', w, h, bg);
   const k = Math.min(w, h) / 1080;
   p.safeZone = { enabled: true, top: 30, right: 6, bottom: 7, left: 6 };
-  p.objects = [titleText(p, packTitle(pack), h * 0.11, 120 * k, { stroke: { enabled: true, color: '#111318', width: 9 * k } }, demo ? 0.6 : 0.86), countPill(assets, demo, w / 2, h * 0.215, k * 1.05)];
+  p.objects = [titleText(p, packTitle(pack), h * 0.11, 120 * k, { stroke: { enabled: true, color: '#111318', width: 9 * k } }, demo ? 0.54 : 0.86, 2), countPill(assets, demo, w / 2, h * 0.215, k * 1.05)];
   p = placeAssets(p, assets.slice(0, cols * rows), { algorithm: 'grid', params: { columns: cols, rows, gapX: 46 * k, gapY: 46 * k, fill: 0.7, padding: 10 * k } }, 0.14);
   const out = withCards(p, k);
   return demo ? demoExtras(out, assets, k) : out;
@@ -449,7 +497,7 @@ function shelfCover(assets: AssetRecord[], pack: string, bg: Background, w: numb
   let p = createPage('Shelves', w, h, bg);
   const k = Math.min(w, h) / 1080;
   p.safeZone = { enabled: true, top: 25, right: 5, bottom: 4, left: 5 };
-  p.objects = [titleText(p, packTitle(pack), h * 0.1, 118 * k, { stroke: { enabled: true, color: '#111318', width: 9 * k } }, demo ? 0.6 : 0.86), countPill(assets, demo, w / 2, h * 0.2, k)];
+  p.objects = [titleText(p, packTitle(pack), h * 0.1, 118 * k, { stroke: { enabled: true, color: '#111318', width: 9 * k } }, demo ? 0.54 : 0.86, 2), countPill(assets, demo, w / 2, h * 0.2, k)];
   const cols = demo ? 4 : 5,
     rowsN = demo ? 2 : 3;
   p = placeAssets(p, assets.slice(0, cols * rowsN), { algorithm: 'grid', params: { columns: cols, rows: rowsN, gapX: 30 * k, gapY: 60 * k, fill: 0.86 } }, 0.14);
@@ -521,7 +569,7 @@ function honeyCover(assets: AssetRecord[], pack: string, bg: Background, w: numb
 function ringCover(assets: AssetRecord[], pack: string, bg: Background, w: number, h: number): Page {
   let p = createPage('Ring cover', w, h, bg);
   const k = Math.min(w, h) / 1080;
-  p.objects = [titleText(p, iconsTitle(pack, assets.length), h / 2 - 20 * k, 110 * k, { stroke: { enabled: true, color: '#111318', width: 9 * k } }, 0.5), presetText('Count pill', `${countToken(assets)}+ ICONS`, w / 2, h / 2 + 70 * k, k)];
+  p.objects = [titleText(p, packTitle(pack), h / 2 - 20 * k, 110 * k, { stroke: { enabled: true, color: '#111318', width: 9 * k } }, 0.5), presetText('Count pill', `${countToken(assets)}+ ICONS`, w / 2, h / 2 + 70 * k, k)];
   p = placeAssets(p, assets.slice(0, 30), { algorithm: 'ring', params: { shape: 'oval', rings: 1, inset: 0.03, fill: 0.85 } }, 0.12);
   return p;
 }
@@ -536,7 +584,7 @@ export const BUILTIN_TEMPLATES: TemplateDef[] = [
     build(assets, pack, bg) {
       let p = createPage('itch.io cover', 630, 500, bg);
       p.safeZone = { enabled: true, top: 24, right: 4, bottom: 4, left: 4 };
-      const title = titleText(p, packTitle(pack), 62, 46, { stroke: { enabled: true, color: '#111318', width: 5 }, shadow: { enabled: true, color: '#000000', blur: 10, dx: 0, dy: 4, opacity: 0.5 } });
+      const title = titleText(p, packTitle(pack), 62, 46, { stroke: { enabled: true, color: '#111318', width: 5 }, shadow: { enabled: true, color: '#000000', blur: 10, dx: 0, dy: 4, opacity: 0.5 } }, 0.86, 2);
       p.objects = [title, presetText('Count burst', `${countToken(assets)}\nICONS`, 560, 430, 0.42)];
       p = placeAssets(p, assets, { algorithm: 'cluster', params: { density: 0.55, gap: 4 } }, 0.16);
       // keep the badge above the assets
@@ -568,12 +616,11 @@ export const BUILTIN_TEMPLATES: TemplateDef[] = [
     description: 'Edge-framed assets around a central title.',
     build(assets, pack, bg) {
       let p = createPage('Hero', 1920, 1080, bg);
-      p.focal = { enabled: true, shape: 'ellipse', x: 960, y: 520, w: 980, h: 420 };
       p.safeZone = { enabled: true, top: 4, right: 3, bottom: 4, left: 3 };
-      p.objects = [
-        titleText(p, iconsTitle(pack, assets.length), 500, 104, { stroke: { enabled: true, color: '#111318', width: 10 } }),
-        presetText('Count pill', `${countToken(assets)}+ ICONS`, 960, 610, 1),
-      ];
+      // the pill carries the count, so the title is just the pack's name; the clear window follows its width
+      const title = titleText(p, packTitle(pack), 500, 112, { stroke: { enabled: true, color: '#111318', width: 10 } }, 0.62, 2);
+      p.focal = { enabled: true, shape: 'ellipse', x: 960, y: 530, w: Math.max(980, Math.min(1320, naturalWidth(title.text, title.style) * 1.25)), h: 440 };
+      p.objects = [title, presetText('Count pill', `${countToken(assets)}+ ICONS`, 960, 612, 1)];
       p = placeAssets(p, assets, { algorithm: 'edgeframe' }, 0.14);
       return p;
     },
@@ -587,7 +634,7 @@ export const BUILTIN_TEMPLATES: TemplateDef[] = [
     build(assets, pack, bg) {
       let p = createPage('Perspective', 1920, 1080, bg);
       p.safeZone = { enabled: true, top: 26, right: 2, bottom: 2, left: 2 };
-      p.objects = [titleText(p, packTitle(pack), 120, 96, { stroke: { enabled: true, color: '#111318', width: 8 } }), titleText(p, `${assets.length || 120} game-ready icons`, 205, 38, { fontFamily: 'Bahnschrift', fontWeight: 500 })];
+      p.objects = [titleText(p, packTitle(pack), 120, 96, { stroke: { enabled: true, color: '#111318', width: 8 } }, 0.86, 2), titleText(p, `${assets.length || 120} GAME-READY ICONS`, 208, 34, SUBLINE(1))];
       p = placeAssets(p, assets, { algorithm: 'floor' }, 0.1);
       return p;
     },
@@ -602,7 +649,7 @@ export const BUILTIN_TEMPLATES: TemplateDef[] = [
       let p = createPage('Square cover', 1080, 1080, bg);
       p.safeZone = { enabled: true, top: 4, right: 4, bottom: 22, left: 4 };
       const band = createShape('rect', 540, 960, 940, 170, { fill: '#000000', opacity: 0.45, radius: 28, name: 'Title band' });
-      p.objects = [band, titleText(p, pack.toUpperCase(), 935, 92, { stroke: { enabled: true, color: '#111318', width: 8 } }), titleText(p, `${assets.length || 120} ICONS`, 1005, 34, { fontFamily: 'Bahnschrift', fontWeight: 600, letterSpacing: 6, fill: '#f5c542' })];
+      p.objects = [band, titleText(p, pack.toUpperCase(), 935, 92, { stroke: { enabled: true, color: '#111318', width: 8 } }), titleText(p, `${assets.length || 120} ICONS`, 1005, 34, SUBLINE(1))];
       p = placeAssets(p, assets.slice(0, 60), { algorithm: 'roundcluster', params: { density: 0.62 } }, 0.14);
       return p;
     },
@@ -693,12 +740,7 @@ export const BUILTIN_TEMPLATES: TemplateDef[] = [
     h: 1080,
     description: 'Category title with a clean row layout.',
     build(assets, pack, bg) {
-      let p = createPage('Category', 1920, 1080, bg);
-      p.safeZone = { enabled: true, top: 20, right: 4, bottom: 5, left: 4 };
-      const cat = assets[0]?.category || 'Category';
-      p.objects = [titleText(p, cat.toUpperCase(), 110, 88, { stroke: { enabled: true, color: '#111318', width: 8 } }), titleText(p, `${pack} · ${assets.length} assets`, 180, 32, { fontFamily: 'Bahnschrift', fontWeight: 500, fill: '#cbd5e1' })];
-      p = placeAssets(p, assets, { algorithm: 'grid' }, 0.12);
-      return p;
+      return buildCategoryPage(assets, assets[0]?.category || 'Category', pack, bg);
     },
   },
   {
@@ -724,7 +766,7 @@ export const BUILTIN_TEMPLATES: TemplateDef[] = [
     build(assets, pack, bg) {
       let p = createPage('Feature highlights', 1920, 1080, bg);
       p.safeZone = { enabled: true, top: 4, right: 4, bottom: 5, left: 4 };
-      p.objects = [titleText(p, packTitle(pack), 130, 100, { stroke: { enabled: true, color: '#111318', width: 9 } }), presetText('Spec chip', `${countToken(assets)} ICONS IN THE FULL PACK`, 960, 228, 0.8)];
+      p.objects = [titleText(p, packTitle(pack), 130, 100, { stroke: { enabled: true, color: '#111318', width: 9 } }), presetText('Count pill', `${countToken(assets)}+ ICONS`, 960, 232, 0.95)];
       p = placeAssets(p, assets.slice(0, 9), { algorithm: 'heroshowcase', params: { title: 'top', titleSize: 0.26 } }, 0.16);
       return p;
     },
@@ -749,7 +791,7 @@ export const BUILTIN_TEMPLATES: TemplateDef[] = [
       let p = createPage('Free demo', 1920, 1080, bg);
       p.safeZone = { enabled: true, top: 22, right: 6, bottom: 6, left: 6 };
       const sample = assets.slice(0, 12);
-      p.objects = [titleText(p, `${packWord(pack).toUpperCase()} ICONS — DEMO`, 120, 92, { stroke: { enabled: true, color: '#111318', width: 8 } }), titleText(p, `${sample.length || 12} free icons · get all ${countToken(assets)} in the full pack`, 205, 36, { fontFamily: 'Segoe UI', fontWeight: 600, fill: '#d9dde4' })];
+      p.objects = [titleText(p, `${packWord(pack).toUpperCase()} ICONS — DEMO`, 120, 92, { stroke: { enabled: true, color: '#111318', width: 8 } }, 0.68), titleText(p, `${sample.length || 12} free icons · get all ${countToken(assets)} in the full pack`, 205, 36, { fontFamily: 'Segoe UI', fontWeight: 600, fill: '#d9dde4' })];
       p = placeAssets(p, sample, { algorithm: 'grid', params: { gap: 36 } }, 0.12);
       return { ...p, objects: [...p.objects, presetText('Demo seal', 'FREE\nDEMO', 1775, 130, 1.05)] };
     },
@@ -887,7 +929,7 @@ export const BUILTIN_TEMPLATES: TemplateDef[] = [
       p.safeZone = { enabled: true, top: 24, right: 4, bottom: 4, left: 4 };
       const panel = createShape('rect', 315, 60, 590, 92, { fill: '#000000', opacity: 0.45, radius: 14, name: 'Header panel' });
       p.objects = [panel, titleText(p, packTitle(pack), 50, 40, { stroke: { enabled: true, color: '#111318', width: 4 } }, 0.9), titleText(p, `${countToken(assets)}+ ICONS`, 88, 18, { fontFamily: 'Bahnschrift', fontWeight: 600, letterSpacing: 3, fill: '#f5c542' })];
-      p = placeAssets(p, assets.slice(0, 30), { algorithm: 'grid', params: { gap: 10 } }, 0.1);
+      p = placeAssets(p, assets.slice(0, 28), { algorithm: 'grid', params: { gapX: 8, gapY: 8, padding: 4, fill: 0.9 } }, 0.1);
       return p;
     },
   },
@@ -1042,7 +1084,7 @@ export const BUILTIN_TEMPLATES: TemplateDef[] = [
       // title across the top, the flow fills the rest
       p.safeZone = { enabled: true, top: 26, right: 2, bottom: 2, left: 2 };
       p.objects = [titleText(p, packTitle(pack), 120, 100, { stroke: { enabled: true, color: '#111318', width: 9 } }, 0.8), presetText('Count pill', `${countToken(assets)}+ ICONS`, 960, 215, 0.95)];
-      p = placeAssets(p, assets, { algorithm: 'diagonal', params: { growth: 0.6, angle: 18 } }, 0.1);
+      p = placeAssets(p, assets, { algorithm: 'diagonal', params: { growth: 0.6, angle: 18, fill: 1.12 } }, 0.1);
       return p;
     },
   },
@@ -1068,7 +1110,7 @@ export const BUILTIN_TEMPLATES: TemplateDef[] = [
     build(assets, pack, bg) {
       let p = createPage('Honeycomb', 1920, 1080, bg);
       p.focal = { enabled: true, shape: 'ellipse', x: 960, y: 540, w: 1080, h: 380 };
-      p.objects = [titleText(p, iconsTitle(pack, assets.length), 520, 104, { stroke: { enabled: true, color: '#111318', width: 10 } }, 0.55), presetText('Count pill', `${countToken(assets)}+ ICONS`, 960, 630, 1)];
+      p.objects = [titleText(p, packTitle(pack), 520, 104, { stroke: { enabled: true, color: '#111318', width: 10 } }, 0.5), presetText('Count pill', `${countToken(assets)}+ ICONS`, 960, 630, 1)];
       p = placeAssets(p, assets, { algorithm: 'honeycomb' }, 0.1);
       return p;
     },
@@ -1163,7 +1205,7 @@ export const BUILTIN_TEMPLATES: TemplateDef[] = [
     description: 'Icons ring the canvas; the title sits in the free center.',
     build(assets, pack, bg) {
       let p = createPage('Ring', 1920, 1080, bg);
-      p.objects = [titleText(p, iconsTitle(pack, assets.length), 515, 96, { stroke: { enabled: true, color: '#111318', width: 8 } }, 0.44), presetText('Count pill', `${countToken(assets)}+ ICONS`, 960, 610, 1)];
+      p.objects = [titleText(p, packTitle(pack), 515, 96, { stroke: { enabled: true, color: '#111318', width: 8 } }, 0.44), presetText('Count pill', `${countToken(assets)}+ ICONS`, 960, 610, 1)];
       p = placeAssets(p, assets.slice(0, 48), { algorithm: 'ring', params: { shape: 'oval', rings: assets.length > 40 ? 2 : 1, inset: 0.03, fill: 0.8 } }, 0.12);
       return p;
     },
@@ -1368,7 +1410,7 @@ export function catalogBackground(name?: string): Background {
 
 export function generateCatalog(assets: AssetRecord[], s: CatalogSettings, size: { w: number; h: number }, background?: string) {
   if (!assets.length) return toast('No assets to catalog', 'warning');
-  const pages = buildCatalogPages(sortForCatalog(assets), s, size, catalogBackground(background));
+  const pages = buildCatalogPages(sortForCatalog(assets), s, size, catalogBackground(background)).map(fitTextsToBoxes);
   addPages(pages, 'Generate catalog');
   guideAction('catalog');
   toast(`Catalog: ${assets.length} assets on ${pages.length} page${pages.length > 1 ? 's' : ''}`, 'success');
@@ -1386,11 +1428,7 @@ export function generateCategoryShowcase(categories: string[], algorithm: string
   for (const cat of categories) {
     const list = assets.filter((a) => a.category === cat);
     if (!list.length) continue;
-    let p = createPage(cat || 'Uncategorized', size.w, size.h, structuredClone(bg));
-    p.safeZone = { enabled: true, top: 20, right: 4, bottom: 5, left: 4 };
-    const s = Math.min(size.w, size.h);
-    p.objects = [titleText(p, (cat || 'Uncategorized').toUpperCase(), size.h * 0.09, s * 0.085, { stroke: { enabled: true, color: '#111318', width: s * 0.008 } }), titleText(p, `${pack} · ${list.length} assets`, size.h * 0.165, s * 0.032, { fontFamily: 'Bahnschrift', fontWeight: 500, fill: '#cbd5e1' })];
-    p = placeAssets(p, list, { algorithm }, 0.12);
+    const p = buildCategoryPage(list, cat, pack, structuredClone(bg), size, algorithm);
     pages.push(p);
   }
   if (!pages.length) return toast('No assets in the chosen categories', 'warning');
@@ -1409,45 +1447,69 @@ export interface MarketplaceOptions {
   balanced: boolean;
 }
 
-export function createMarketplaceSet(o: MarketplaceOptions) {
-  const all = libraryAssets();
-  if (!all.length) return toast('Import assets first', 'warning');
-  const bg0 = structuredClone(getPage().background);
-  const bg = bg0.type === 'transparent' ? BACKGROUND_PRESETS[4].bg() : bg0;
-  const seed = Math.floor(Math.random() * 1e6);
-  const heroSet = pickRandom(all, Math.min(o.heroCount, all.length), o.balanced ? 'equal' : 'any', seed);
+/** Layout of the store-set hero: an organic, non-overlapping crowd on the floor, biggest icons in front. */
+export const STORE_HERO_STYLE = { arrange: 'organic', rowSort: 'sizeFront', noOverlap: true, near: 1.35, far: 0.38, randPos: 0.12, randScale: 0.06, randRot: 0, density: 0.9, strength: 0.6 };
+
+/**
+ * The pages of a store set, built but not added: hero, square cover, catalog and one page per
+ * category. Every page uses the same title and subtitle styles and the same backdrop, so the set
+ * reads as one design. `bg` is the backdrop of the hero, cover and category pages.
+ */
+export function buildStoreSetPages(all: AssetRecord[], o: MarketplaceOptions, bg: Background, seed: number): Page[] {
+  const tpl = (id: string) => BUILTIN_TEMPLATES.find((x) => x.id === id)!;
   const pages: Page[] = [];
   if (o.hero) {
-    const t = BUILTIN_TEMPLATES.find((x) => x.id === (o.heroLayout === 'floor' ? 'perspective' : 'hero'))!;
-    const p = t.build(heroSet, o.pack, structuredClone(bg));
+    const heroSet = pickRandom(all, Math.min(o.heroCount, all.length), o.balanced ? 'equal' : 'any', seed);
+    let p = tpl(o.heroLayout === 'floor' ? 'perspective' : 'hero').build(heroSet, o.pack, structuredClone(bg));
+    const inst = p.layouts[0];
+    if (inst && o.heroLayout === 'floor') {
+      const styled = { ...inst, params: { ...inst.params, ...STORE_HERO_STYLE } };
+      p = runLayout({ ...p, layouts: [styled] }, styled, { getAsset });
+    }
     p.name = 'Hero';
     p.exportName = 'hero';
     pages.push(p);
   }
   if (o.cover) {
-    const p = BUILTIN_TEMPLATES.find((x) => x.id === 'square')!.build(pickRandom(all, Math.min(24, all.length), 'equal', seed + 1), o.pack, structuredClone(bg));
+    const p = tpl('square').build(pickRandom(all, Math.min(24, all.length), 'equal', seed + 1), o.pack, structuredClone(bg));
     p.name = 'Cover';
     p.exportName = 'cover';
     pages.push(p);
   }
   if (o.catalog) {
-    const cps = buildCatalogPages(sortForCatalog(all), { ...DEFAULT_CATALOG, title: `${o.pack} — ${all.length} assets` }, { w: 3000, h: 3000 }, BACKGROUND_PRESETS[4].bg());
+    // the catalog keeps a plain backdrop: a photo or busy gradient behind hundreds of small icons hurts
+    const plain = bg.type === 'image' || bg.type === 'transparent' ? BACKGROUND_PRESETS[4].bg() : structuredClone(bg);
+    const light = isLightBackground(plain) ? CATALOG_STYLES.find((c) => c.name === 'Light')!.settings : {};
+    const cps = buildCatalogPages(sortForCatalog(all), { ...DEFAULT_CATALOG, ...light, title: packTitle(o.pack) }, { w: 3000, h: 3000 }, plain);
     cps.forEach((p, i) => (p.exportName = cps.length > 1 ? `catalog_${i + 1}` : 'catalog'));
     pages.push(...cps);
   }
   if (o.categories) {
     const cats = [...new Set(all.map((a) => a.category))].filter(Boolean);
+    const used = new Set<string>();
     for (const cat of cats) {
-      const list = all.filter((a) => a.category === cat);
-      const p = BUILTIN_TEMPLATES.find((x) => x.id === 'category')!.build(list, o.pack, structuredClone(bg));
-      p.name = cat;
-      p.exportName = cat.toLowerCase().replace(/\s+/g, '_');
+      const p = buildCategoryPage(all.filter((a) => a.category === cat), cat, o.pack, structuredClone(bg));
+      // two categories must never export to the same file name
+      let name = cat.toLowerCase().replace(/\s+/g, '_');
+      for (let i = 2; used.has(name); i++) name = `${cat.toLowerCase().replace(/\s+/g, '_')}_${i}`;
+      used.add(name);
+      p.exportName = name;
       pages.push(p);
     }
   }
-  addPages(pages, 'Create marketplace set');
+  return pages.map(fitTextsToBoxes);
+}
+
+export function createMarketplaceSet(o: MarketplaceOptions) {
+  const all = libraryAssets();
+  if (!all.length) return toast('Import assets first', 'warning');
+  const bg0 = structuredClone(getPage().background);
+  const bg = bg0.type === 'transparent' ? BACKGROUND_PRESETS[4].bg() : bg0;
+  const pages = buildStoreSetPages(all, o, bg, Math.floor(Math.random() * 1e6));
+  if (!pages.length) return toast('Choose at least one page to create', 'warning');
+  addPages(pages, 'Custom store set');
   guideAction('storeset');
-  toast(`Created ${pages.length} pages`, 'success');
+  toast(`Created ${pages.length} page${pages.length > 1 ? 's' : ''}`, 'success');
 }
 
 // ---------------------------------------------------------------------------
@@ -1713,6 +1775,10 @@ function leftText(text: string, left: number, y: number, style: Partial<TextStyl
   t.x = left + maxW / 2;
   return t;
 }
+/** Move `sub` so it sits `gap` under `title`, however many lines the title took. */
+function under<T extends { y: number; h: number }>(title: { y: number; h: number }, sub: T, gap: number): T {
+  return { ...sub, y: Math.max(sub.y, title.y + title.h / 2 + gap + sub.h / 2) };
+}
 /** Centred text that fits `maxW`. */
 function centerText(text: string, cx: number, y: number, style: Partial<TextStyle>, maxW: number) {
   const t = leftText(text, cx - maxW / 2, y, style, maxW);
@@ -1760,7 +1826,8 @@ export const PRO_TEMPLATES: TemplateDef[] = [
     build(assets, pack) {
       let p = createPage('Minimal cover', 630, 500, studioDark());
       p.safeZone = { enabled: true, top: 30, right: 6, bottom: 6, left: 6 };
-      p.objects = [leftText(packTitleCase(pack), 38, 66, proStyle(DARK, 42), 554), leftText(factLine(assets), 38, 110, proStyle(DARK_SUB, 16, 450), 554)];
+      const title = leftText(packTitleCase(pack), 38, 66, proStyle(DARK, 42), 554);
+      p.objects = [title, under(title, leftText(factLine(assets), 38, 110, proStyle(DARK_SUB, 16, 450), 554), 8)];
       return placeAssets(p, assets.slice(0, 15), { algorithm: 'grid', params: { complete: true, fill: 0.78, gapX: 14, gapY: 14, padding: 0 } }, 0.12);
     },
   },
@@ -1969,5 +2036,82 @@ export const PRO_TEMPLATES: TemplateDef[] = [
       return placeAssets(p, assets.slice(0, 24), { algorithm: 'split', params: { side: 'right', share: 0.52, style: 'grid', gap: 16, fill: 0.82 } }, 0.1);
     },
   },
+  {
+    id: 'pro-contents',
+    name: 'Pack Contents',
+    group: 'Clean & professional',
+    look: 'pro-studio-dark',
+    w: 1920,
+    h: 1080,
+    description: 'What is inside: every category with its icon count on the left, a tidy grid on the right.',
+    build(assets, pack) {
+      let p = createPage('Pack contents', 1920, 1080, studioDark());
+      p.safeZone = { enabled: true, top: 9, right: 5, bottom: 9, left: 5 };
+      const f = packFacts(assets);
+      const counts = f.categories.map((c): [string, string] => [c, String(assets.filter((a) => a.category === c).length)]);
+      // packs without categories list the facts read from the files instead
+      const rows: [string, string][] =
+        counts.length > 1
+          ? [...counts.slice(0, 6), ...(counts.length > 6 ? [[`${counts.length - 6} more categories`, String(counts.slice(6).reduce((n, c) => n + Number(c[1]), 0))] as [string, string]] : [])]
+          : [['Icons', `${countToken(assets)}`], ['Format', f.formats || 'PNG'], ['Sizes', f.sizes || 'Any'], ...(f.alpha ? [['Background', 'Transparent'] as [string, string]] : [])];
+      const L = 110,
+        R = 800,
+        step = Math.min(96, 560 / rows.length),
+        y0 = 440;
+      const title = leftText(packTitleCase(pack), L, 190, proStyle(DARK, 92), R - L);
+      p.objects = [title, under(title, leftText(factLine(assets), L, 286, proStyle(DARK_SUB, 30, 450), R - L), 16), hairline(L, R, y0 - step / 2, 1)];
+      rows.forEach(([name, value], i) => {
+        const y = y0 + i * step;
+        const v = leftText(value, R - 280, y, proStyle(DARK, 40, 600, { fontFamily: PRO_MONO }), 280);
+        p.objects.push(leftText(name, L, y, proStyle(DARK_SUB, 40, 500), R - L - 300), { ...v, style: { ...v.style, align: 'right' } }, hairline(L, R, y + step / 2, 1));
+      });
+      p = placeAssets(p, assets.slice(0, 30), { algorithm: 'split', params: { side: 'right', share: 0.5, style: 'grid', gap: 22, fill: 0.78 } }, 0.1);
+      return softCells(p);
+    },
+  },
+  {
+    id: 'pro-spotlight-cover',
+    name: 'Light Spotlight Cover',
+    group: 'itch.io covers',
+    look: 'pro-studio-light',
+    w: 630,
+    h: 500,
+    description: 'A bright cover: one featured icon set large inside an even grid, title and facts above.',
+    build(assets, pack) {
+      let p = createPage('Spotlight cover', 630, 500, studioLight());
+      p.safeZone = { enabled: true, top: 29, right: 6, bottom: 6, left: 6 };
+      const title = leftText(packTitleCase(pack), 38, 64, proStyle(LIGHT, 42), 554);
+      p.objects = [title, under(title, leftText(factLine(assets), 38, 108, proStyle(LIGHT_SUB, 16, 450), 554), 8)];
+      p = placeAssets(p, assets.slice(0, 13), { algorithm: 'feature', params: { span: '2', gap: 10, padding: 0, fill: 0.76 } }, 0.12);
+      return softCells(p, '#000000', 0.045);
+    },
+  },
+  {
+    id: 'pro-story',
+    name: 'Clean Story',
+    group: 'Square & social',
+    look: 'pro-studio-dark',
+    w: 1080,
+    h: 1920,
+    description: 'Portrait for stories and reels: title on top, twelve icons in quiet cells, the count below.',
+    build(assets, pack) {
+      let p = createPage('Clean story', 1080, 1920, studioDark());
+      p.safeZone = { enabled: true, top: 24, right: 8, bottom: 14, left: 8 };
+      const title = leftText(packTitleCase(pack), 88, 250, proStyle(DARK, 104), 904);
+      p.objects = [title, under(title, leftText(factLine(assets), 88, 372, proStyle(DARK_SUB, 32, 450), 904), 22), proChip(`${countToken(assets)} icons`, 540, 1760, 38)];
+      const shown = assets.slice(0, 12);
+      p = placeAssets(p, shown, { algorithm: 'grid', params: { columns: shown.length > 4 || !shown.length ? 3 : 2, rows: shown.length ? Math.ceil(shown.length / (shown.length > 4 ? 3 : 2)) : 4, fill: 0.74, gapX: 28, gapY: 28, padding: 0 } }, 0.12);
+      return softCells(p);
+    },
+  },
 ];
 BUILTIN_TEMPLATES.push(...PRO_TEMPLATES);
+
+// A long pack name must shrink its title, never wrap it onto the badge or icons below. Every
+// template gets that pass except the two whose output is frozen (tests/protectedTemplates.test.ts).
+const FROZEN_TEMPLATES = new Set(['wall-cover', 'cover-ribbon']);
+for (const t of BUILTIN_TEMPLATES) {
+  if (FROZEN_TEMPLATES.has(t.id)) continue;
+  const build = t.build;
+  t.build = (assets, pack, bg) => fitTextsToBoxes(build(assets, pack, bg));
+}
