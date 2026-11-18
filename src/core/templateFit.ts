@@ -90,6 +90,13 @@ const RANGE: Record<string, [number, number]> = {
   'pro-contents': [18, ALL],
   'pro-spotlight-cover': [9, ALL],
   'pro-story': [9, ALL],
+  // in-use templates show a fixed number of slots; fewer icons leave slots empty, as in a game
+  'ui-inventory': [12, ALL],
+  'ui-inventory-cover': [10, ALL],
+  'ui-hotbar': [6, ALL],
+  'size-ladder': [4, ALL],
+  bento: [10, ALL],
+  'bento-square': [6, ALL],
 };
 /** Templates built around categories. */
 const NEEDS_CATEGORIES = new Set(['pro-category', 'pro-contents']);

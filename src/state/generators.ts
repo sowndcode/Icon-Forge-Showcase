@@ -3,7 +3,8 @@
 
 import { guideAction } from './guideProgress';
 import { buildCatalogPages, CATALOG_STYLES, DEFAULT_CATALOG, isLightBackground } from '../core/catalog';
-import { BACKGROUND_PRESETS, CANVAS_PRESETS, presetName, createPage, createShape, createText, grad, scaleTextStyle, TEXT_PRESETS, withLight, withPattern } from '../core/defaults';
+import { BACKGROUND_PRESETS, CANVAS_PRESETS, presetName, createPage, createShape, createText, grad, scaleTextStyle, solid, TEXT_PRESETS, withLight, withPattern } from '../core/defaults';
+import { prettyCategory, prettyName } from '../services/formats';
 import { naturalWidth, textHeight } from '../render/text';
 import { apportion } from '../layout/common';
 import { uid } from '../core/ids';
@@ -190,6 +191,7 @@ export interface TemplateDef {
 export const TEMPLATE_GROUPS: { id: string; desc: string }[] = [
   { id: 'itch.io covers', desc: '630 × 500 store covers' },
   { id: 'Clean & professional', desc: 'Restrained layouts with real facts about the pack — store pages, catalogs, social' },
+  { id: 'Game UI mockups', desc: 'Icons shown in use — an inventory, a hotbar, the sizes a game draws them' },
   { id: 'Wide thumbnails', desc: '1920 × 1080 for galleries, screenshots and store pages' },
   { id: 'Square & social', desc: 'Square posts, stories and portrait promos' },
   { id: 'Banners & headers', desc: 'Wide strips: Steam capsules, YouTube, launch banners' },
@@ -276,7 +278,35 @@ export function reflowPage(p: Page, W: number, H: number): Page {
     layouts: p.layouts.map((l) => ({ ...l, plane: undefined, path: undefined, slots: l.slots.map((sl) => ({ ...sl, cx: sl.cx * kx, cy: sl.cy * ky, w: sl.w * k, h: sl.h * k })) })),
   };
   for (const l of out.layouts) out = runLayout(out, out.layouts.find((x) => x.id === l.id)!, { getAsset });
-  return out;
+  return resnapSlots(out);
+}
+
+/**
+ * Slot frames (inventory, hotbar) follow the fixed grid they frame. A new page shape re-centres the
+ * grid's square cells, which plain scaling would leave the frames out of line with; here each
+ * `Slot n` frame, the selected-slot frame and the `Key n` labels are put back on their cells.
+ */
+function resnapSlots(p: Page): Page {
+  const inst = p.layouts[0];
+  const cols = Number(inst?.params.columns) || 0,
+    rows = Number(inst?.params.rows) || 0;
+  if (!inst || inst.algorithm !== 'grid' || !cols || !rows) return p;
+  const slotNo = (o: SceneObject) => (/^(Slot|Key) (\d+)$/.exec(o.name)?.[2] ?? '');
+  if (!p.objects.some((o) => o.type === 'shape' && slotNo(o))) return p;
+  const cells = slotCells(p, cols, rows, Number(inst.params.gapX) || 0);
+  const nearest = (x: number, y: number) => cells.reduce((b, c) => (Math.hypot(c.cx - x, c.cy - y) < Math.hypot(b.cx - x, b.cy - y) ? c : b), cells[0]);
+  return {
+    ...p,
+    objects: p.objects.map((o): SceneObject => {
+      const n = Number(slotNo(o));
+      const c = n ? cells[n - 1] : o.type === 'shape' && o.name.startsWith('Selected slot') ? nearest(o.x, o.y) : undefined;
+      if (!c) return o;
+      if (o.type === 'text') return { ...o, x: c.cx - c.s / 2 + c.s * 0.1 + o.w / 2, y: c.cy - c.s / 2 + c.s * 0.15 };
+      if (o.type !== 'shape') return o;
+      const s = o.name.startsWith('Selected') ? c.s * 1.07 : c.s;
+      return { ...o, x: c.cx, y: c.cy, w: s, h: s, radius: s * 0.14 };
+    }),
+  };
 }
 
 export const DEFAULT_TEMPLATE_OPTIONS: TemplateOptions = { text: 'keep', icons: 1 };
@@ -2106,6 +2136,358 @@ export const PRO_TEMPLATES: TemplateDef[] = [
   },
 ];
 BUILTIN_TEMPLATES.push(...PRO_TEMPLATES);
+
+// ---------------------------------------------------------------------------
+// In-use templates
+//
+// Buyers want to see icons the way a game will use them: in an inventory, on a hotbar, at the sizes
+// the game draws them. Every label is read from the files (names, sizes, formats, counts), never
+// invented. Slot frames use the same cells as the Grid layout that places the icons, so frames and
+// icons line up, and empty slots stay visible when a pack has fewer icons than slots.
+// ---------------------------------------------------------------------------
+
+const gameBg = () => withPattern(grad('radial', ['#1f1838', '#07060d'], 0.5, 0.45), { kind: 'grid', color: '#a78bfa', opacity: 0.05, scale: 1.4 });
+const GAME_ACCENT = '#a3e635',
+  GAME_SUB = '#b8b2cc',
+  PANEL = '#14111f',
+  TILE = '#1a1b20';
+
+interface SlotCell {
+  cx: number;
+  cy: number;
+  s: number;
+}
+
+/** Safe zone (in %) that makes the page's layout area exactly this rectangle. */
+function zoneFor(p: Page, x1: number, y1: number, x2: number, y2: number) {
+  return { enabled: true, left: (x1 / p.width) * 100, right: ((p.width - x2) / p.width) * 100, top: (y1 / p.height) * 100, bottom: ((p.height - y2) / p.height) * 100 };
+}
+
+/** The cells a fixed Grid layout (columns × rows, square cells, no padding) uses in the page's safe area. */
+function slotCells(p: Page, cols: number, rows: number, gap: number): SlotCell[] {
+  const a = safeRect(p);
+  const s = Math.min((a.w - gap * (cols - 1)) / cols, (a.h - gap * (rows - 1)) / rows);
+  const x0 = a.x + (a.w - (cols * s + gap * (cols - 1))) / 2,
+    y0 = a.y + (a.h - (rows * s + gap * (rows - 1))) / 2;
+  const out: SlotCell[] = [];
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) out.push({ cx: x0 + c * (s + gap) + s / 2, cy: y0 + r * (s + gap) + s / 2, s });
+  return out;
+}
+
+/** Icons in the first slots of a fixed grid (rows filled left to right, the last row not centred). */
+function placeInSlots(p: Page, assets: AssetRecord[], cols: number, rows: number, gap: number, fill = 0.7): Page {
+  const params = { columns: cols, rows, gapX: gap, gapY: gap, padding: 0, fill, square: true, centerLast: false, stagger: false, complete: false, maxCell: 0, align: 'center' };
+  return placeAssets(p, assets.slice(0, cols * rows), { algorithm: 'grid', params, avoidFocal: false }, 0.1);
+}
+
+/**
+ * A dark square with a thin border for every slot, and a bright frame on the selected one. Themes
+ * make dark fills their panel colour and borders their accent, so slots read on light and dark looks.
+ */
+function slotFrames(cells: SlotCell[], k: number, selected = -1): SceneObject[] {
+  const out: SceneObject[] = cells.map((c, i) => createShape('rect', c.cx, c.cy, c.s, c.s, { fill: PANEL, opacity: 0.9, radius: c.s * 0.14, stroke: '#3a3357', strokeWidth: 1.5 * k, name: `Slot ${i + 1}` }));
+  const c = cells[selected];
+  if (c) {
+    const s = c.s + 8 * k;
+    out.push(createShape('rect', c.cx, c.cy, s, s, { fill: GAME_ACCENT, opacity: 0.16, radius: s * 0.15, strokeWidth: 0, name: 'Selected slot glow' }));
+    out.push(createShape('rect', c.cx, c.cy, s, s, { fillEnabled: false, stroke: GAME_ACCENT, strokeWidth: 4 * k, radius: s * 0.15, name: 'Selected slot' }));
+  }
+  return out;
+}
+
+/** An outline around a group of slots (an inventory window, a hotbar); themes give it their accent. */
+const slotWindow = (cx: number, cy: number, w: number, h: number, r: number, k: number, name: string) => createShape('rect', cx, cy, w, h, { fillEnabled: false, stroke: '#ffffff', strokeWidth: 2 * k, opacity: 0.14, radius: r, name });
+
+/** Shapes go behind the page's icons and text, in the order given. */
+const behind = (p: Page, shapes: SceneObject[]): Page => ({ ...p, objects: [...shapes, ...p.objects] });
+
+/** One icon as a free image, fitted (by its visible pixels) into a box. */
+function featuredImage(p: Page, a: AssetRecord | undefined, cx: number, cy: number, box: number): ImageObject[] {
+  if (!a) return [];
+  const o = newImageObject(a.id, { x: cx, y: cy }, p, 0.2);
+  return [{ ...o, name: `Featured: ${o.name}`, ...placeImageByVisibleBox(o, a, cx, cy, box, box, 0) }];
+}
+
+/** "fire_sword.png" → "Fire Sword"; its category and "32×32 px · PNG", all from the file. */
+function itemFacts(a: AssetRecord | undefined) {
+  if (!a) return { name: 'Item name', category: 'Category', spec: 'Size · format' };
+  const fmt = a.format === 'jpeg' ? 'JPG' : a.format.toUpperCase();
+  return { name: prettyName(a.name), category: a.category ? prettyCategory(a.category) : 'Uncategorized', spec: a.width && a.height ? `${a.width}×${a.height} px · ${fmt}` : fmt };
+}
+
+/** Text with its right edge at `right`, shrunk to fit `maxW`. */
+function rightText(text: string, right: number, y: number, style: Partial<TextStyle>, maxW: number) {
+  const t = leftText(text, right - maxW, y, style, maxW);
+  return { ...t, style: { ...t.style, align: 'right' as const } };
+}
+
+const monoLabel = (fill: string, size: number) => proStyle(fill, size, 600, { fontFamily: PRO_MONO, letterSpacing: size * 0.12, uppercase: true });
+
+/**
+ * Sizes for the size ladder. Pixel-art sources (64 px or less) double from their own size, so every
+ * step is a whole-number scale; larger sources show the common UI sizes a game draws them at (up to
+ * twice their own size). `mult` is the scale of the source when it is a whole number, else 0.
+ */
+export function ladderSizes(src: number, maxPx: number): { px: number; mult: number }[] {
+  const out: { px: number; mult: number }[] = [];
+  if (src > 0 && src <= 64) {
+    for (let m = 1; src * m <= maxPx; m *= 2) out.push({ px: src * m, mult: m });
+    return out.slice(-5);
+  }
+  for (const px of [32, 64, 128, 256, 512]) if (px <= maxPx && (!src || px <= src * 2)) out.push({ px, mult: src && px >= src && px % src === 0 ? px / src : 0 });
+  return out.slice(-5);
+}
+
+function inventoryPage(assets: AssetRecord[], pack: string): Page {
+  let p = createPage('Inventory mockup', 1920, 1080, gameBg());
+  const k = 1;
+  const a = assets[0];
+  const it = itemFacts(a);
+  const title = leftText(packTitleCase(pack), 110, 112, proStyle(DARK, 76, 700), 1160);
+  const panel = slotWindow(680, 625, 1140, 750, 20, k, 'Inventory window');
+  const card = createShape('rect', 1560, 625, 500, 750, { fill: PANEL, opacity: 0.94, radius: 20, strokeWidth: 0, name: 'Tooltip card' });
+  p.objects = [
+    title,
+    under(title, leftText(factLine(assets), 110, 180, proStyle(GAME_SUB, 28, 450), 1160), 10),
+    leftText('Inventory', 150, 298, monoLabel(GAME_SUB, 26), 500),
+    rightText(`${countToken(assets)} icons`, 1210, 298, proStyle(GAME_SUB, 26, 500, { fontFamily: PRO_MONO }), 500),
+    hairline(150, 1210, 340, k),
+    leftText('Selected item', 1350, 298, monoLabel(GAME_SUB, 22), 420),
+    hairline(1350, 1770, 340, k),
+    centerText(it.name, 1560, 790, proStyle(DARK, 44, 650), 420),
+    centerText(it.category, 1560, 850, proStyle(GAME_ACCENT, 28, 600), 420),
+    centerText(it.spec, 1560, 900, proStyle(GAME_SUB, 24, 500, { fontFamily: PRO_MONO }), 420),
+  ];
+  p.safeZone = zoneFor(p, 150, 372, 1210, 966);
+  p = placeInSlots(p, assets, 9, 5, 14);
+  const slots = slotCells(p, 9, 5, 14);
+  p = behind(p, [panel, card, ...slotFrames(slots, k, a ? 0 : -1)]);
+  return { ...p, objects: [...p.objects, ...featuredImage(p, a, 1560, 540, 300)] };
+}
+
+function inventoryCover(assets: AssetRecord[], pack: string): Page {
+  let p = createPage('Inventory cover', 630, 500, gameBg());
+  const k = 500 / 1080;
+  const title = leftText(packTitleCase(pack), 32, 50, proStyle(DARK, 38, 700), 566);
+  const panel = slotWindow(315, 298, 590, 372, 12, 1, 'Inventory window');
+  p.objects = [title, under(title, leftText(factLine(assets), 32, 90, proStyle(GAME_SUB, 15, 500), 566), 4)];
+  p.safeZone = zoneFor(p, 38, 130, 592, 466);
+  p = placeInSlots(p, assets, 7, 4, 7);
+  return behind(p, [panel, ...slotFrames(slotCells(p, 7, 4, 7), k, assets.length ? 0 : -1)]);
+}
+
+function hotbarBanner(assets: AssetRecord[], pack: string): Page {
+  let p = createPage('Hotbar banner', 1920, 640, gameBg());
+  const k = 640 / 1080;
+  const n = 10,
+    s = 118,
+    gap = 14;
+  const w = n * s + (n - 1) * gap;
+  const title = centerText(packTitleCase(pack), 960, 168, proStyle(DARK, 84, 700), 1600);
+  const bar = slotWindow(960, 432, w + 44, s + 44, 22, 1.4, 'Hotbar');
+  p.objects = [title, under(title, centerText(factLine(assets), 960, 230, proStyle(GAME_SUB, 28, 450), 1500), 12)];
+  p.safeZone = zoneFor(p, 960 - w / 2, 432 - s / 2, 960 + w / 2, 432 + s / 2);
+  p = placeInSlots(p, assets, n, 1, gap, 0.68);
+  const cells = slotCells(p, n, 1, gap);
+  // the number keys, top-left in each slot as games print them
+  const keys = cells.map((c, i) => ({ ...leftText(String((i + 1) % 10), c.cx - c.s / 2 + 12, c.cy - c.s / 2 + 18, proStyle(GAME_SUB, 18, 600, { fontFamily: PRO_MONO }), 16), name: `Key ${i + 1}` }));
+  p = behind(p, [bar, ...slotFrames(cells, k * 1.4, assets.length ? 0 : -1)]);
+  return { ...p, objects: [...p.objects, ...keys] };
+}
+
+function sizeLadder(assets: AssetRecord[], pack: string): Page {
+  let p = createPage('Size ladder', 1920, 1080, withPattern(solid('#0b1220'), { kind: 'grid', color: '#60a5fa', opacity: 0.07, scale: 1 }));
+  const a = assets[0];
+  const src = a ? Math.max(a.width, a.height) : 0;
+  const steps = ladderSizes(src, 400);
+  const gap = 64;
+  // the ladder and its labels sit centred between the title and the strip of icons
+  const base = 540 + Math.max(0, ...steps.map((x) => x.px)) / 2 - 50;
+  const total = steps.reduce((t, s) => t + s.px, 0) + gap * Math.max(0, steps.length - 1);
+  const title = leftText(packTitleCase(pack), 110, 104, proStyle('#e6edf7', 72, 650), 1300);
+  const sub = a ? `${prettyName(a.name)} · ${a.width}×${a.height} px, shown at ${steps.length} sizes` : 'One icon at every size a game draws it';
+  p.objects = [title, under(title, leftText(sub, 110, 170, proStyle('#8fb6e6', 28, 450, { fontFamily: PRO_MONO }), 1500), 10), hairline(110, 1810, base + 14, 1, '#8fb6e6')];
+  const frames: SceneObject[] = [];
+  const W = a?.width || 1,
+    H = a?.height || 1;
+  let x = 960 - total / 2;
+  for (const s of steps) {
+    const cx = x + s.px / 2;
+    frames.push(createShape('rect', cx, base - s.px / 2, s.px, s.px, { fillEnabled: false, stroke: '#ffffff', strokeWidth: 1.5, opacity: 0.14, name: `${s.px} px box` }));
+    if (a) {
+      const f = s.px / Math.max(W, H);
+      const o = newImageObject(a.id, { x: cx, y: base - s.px / 2 }, p, 0.1);
+      p.objects.push({ ...o, name: `${o.name} ${s.px} px`, w: W * f, h: H * f, y: base - (H * f) / 2 });
+    }
+    p.objects.push(centerText(`${s.px} px`, cx, base + 60, proStyle('#e6edf7', 30, 600, { fontFamily: PRO_MONO }), Math.max(150, s.px)));
+    if (s.mult) p.objects.push(centerText(s.mult === 1 ? 'original' : `${s.mult}×`, cx, base + 100, proStyle('#8fb6e6', 24, 500, { fontFamily: PRO_MONO }), Math.max(150, s.px)));
+    x += s.px + gap;
+  }
+  p.safeZone = zoneFor(p, 150, 880, 1770, 1030);
+  p = placeAssets(p, assets.slice(1, 13), { algorithm: 'grid', params: { columns: 12, rows: 1, gapX: 26, gapY: 0, padding: 0, fill: 0.76, square: true, maxCell: 0 }, avoidFocal: false }, 0.1);
+  return behind(p, [hairline(110, 1810, 860, 1, '#8fb6e6'), ...frames]);
+}
+
+/**
+ * `text` in the fewest lines (up to `maxLines`) that fit `maxW` at the style's size, with the breaks
+ * placed so the longest line is as short as possible. A name that never fits takes `maxLines`
+ * (the caller shrinks it).
+ */
+export function wrapLines(text: string, style: Partial<TextStyle>, maxW: number, maxLines: number): string {
+  const probe = createText(text, 0, 0, style);
+  const words = text.split(/\s+/).filter(Boolean);
+  const width = (from: number, to: number) => naturalWidth(words.slice(from, to).join(' '), probe.style);
+  // the most even split of words[from…] into n lines: [longest line, line texts]
+  const split = (from: number, n: number): [number, string[]] => {
+    if (n === 1) return [width(from, words.length), [words.slice(from).join(' ')]];
+    let best: [number, string[]] = [Infinity, []];
+    for (let i = from + 1; i <= words.length - n + 1; i++) {
+      const [rest, lines] = split(i, n - 1);
+      const w = Math.max(width(from, i), rest);
+      if (w < best[0]) best = [w, [words.slice(from, i).join(' '), ...lines]];
+    }
+    return best;
+  };
+  let out = text;
+  for (let n = 1; n <= Math.min(maxLines, words.length); n++) {
+    const [w, lines] = split(0, n);
+    out = lines.join('\n');
+    if (w <= maxW) break;
+  }
+  return out;
+}
+
+interface BentoBox {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+const tile = (b: BentoBox, r: number, name: string, fill = TILE) => createShape('rect', b.x + b.w / 2, b.y + b.h / 2, b.w, b.h, { fill, opacity: 1, radius: r, strokeWidth: 0, name });
+
+/**
+ * Bento: tiles of different sizes, one job each — the name, the count, one icon in focus and a
+ * sample grid. `size` 'wide' (1920×1080) or 'square' (1080×1080).
+ */
+function bentoPage(assets: AssetRecord[], pack: string, size: 'wide' | 'square'): Page {
+  const wide = size === 'wide';
+  const W = wide ? 1920 : 1080,
+    H = 1080;
+  let p = createPage('Bento showcase', W, H, studioDark());
+  const m = wide ? 72 : 56,
+    g = wide ? 24 : 20,
+    r = wide ? 28 : 24;
+  const a = assets[0];
+  const facts = itemFacts(a);
+  let T: BentoBox, N: BentoBox, F: BentoBox, G: BentoBox, cols: number, rows: number;
+  if (wide) {
+    T = { x: m, y: m, w: 700, h: 528 };
+    N = { x: m, y: m + 528 + g, w: 700, h: H - 2 * m - 528 - g };
+    F = { x: m + 700 + g, y: m, w: 540, h: H - 2 * m };
+    G = { x: F.x + F.w + g, y: m, w: W - m - (F.x + F.w + g), h: H - 2 * m };
+    cols = 3;
+    rows = 6;
+  } else {
+    T = { x: m, y: m, w: W - 2 * m, h: 300 };
+    F = { x: m, y: m + 300 + g, w: 524, h: H - 2 * m - 300 - g };
+    N = { x: F.x + F.w + g, y: F.y, w: W - m - (F.x + F.w + g), h: 240 };
+    G = { x: N.x, y: N.y + N.h + g, w: N.w, h: H - m - (N.y + N.h + g) };
+    cols = 3;
+    rows = 3;
+  }
+  const pad = wide ? 56 : 44;
+  const titleStyle = proStyle(DARK, wide ? 96 : 72, 700, { lineHeight: 1.02 });
+  const kicker = leftText('Icon pack', T.x + pad, T.y + pad + 14, monoLabel(DARK_SUB, wide ? 24 : 20), T.w - 2 * pad);
+  const t0 = leftText(wrapLines(packTitleCase(pack), titleStyle, T.w - 2 * pad, 3), T.x + pad, 0, titleStyle, T.w - 2 * pad);
+  // the title hangs from under the kicker, however many lines it takes, and leaves room for the facts
+  const top = kicker.y + kicker.h / 2 + (wide ? 36 : 22);
+  const room = T.y + T.h - pad - (wide ? 70 : 52) - top;
+  const f = Math.min(1, room / t0.h);
+  const t1 = f < 1 ? { ...t0, style: scaleTextStyle(t0.style, f) as TextStyle, h: t0.h * f } : t0;
+  const title = { ...t1, y: top + t1.h / 2 };
+  const count = leftText(countToken(assets), N.x + pad, N.y + N.h * 0.42, proStyle(LIGHT, wide ? 150 : 110, 700, { lineHeight: 0.95 }), N.w - 2 * pad);
+  p.objects = [
+    kicker,
+    title,
+    under(title, leftText(factLine(assets), T.x + pad, T.y + T.h * 0.7, proStyle(DARK_SUB, wide ? 30 : 24, 450), T.w - 2 * pad), wide ? 24 : 14),
+    count,
+    under(count, leftText('icons', N.x + pad, N.y + N.h * 0.7, proStyle(LIGHT_SUB, wide ? 40 : 30, 500), N.w - 2 * pad), 6),
+    centerText(facts.name, F.x + F.w / 2, F.y + F.h - (wide ? 150 : 110), proStyle(DARK, wide ? 40 : 32, 650), F.w - 2 * pad),
+    centerText(facts.category, F.x + F.w / 2, F.y + F.h - (wide ? 96 : 66), proStyle(DARK_SUB, wide ? 26 : 22, 500), F.w - 2 * pad),
+  ];
+  const ip = wide ? 48 : 36;
+  p.safeZone = zoneFor(p, G.x + ip, G.y + ip, G.x + G.w - ip, G.y + G.h - ip);
+  // a sample, centred in its tile: a few icons stay together instead of hugging the top
+  const gap = wide ? 18 : 14;
+  p = placeAssets(p, assets.slice(1, 1 + cols * rows), { algorithm: 'grid', params: { columns: cols, rows: 0, gapX: gap, gapY: gap, padding: 0, fill: 0.78, square: true, centerLast: true, maxCell: 0 }, avoidFocal: false }, 0.1);
+  const box = Math.min(F.w - 2 * pad, F.h * 0.5);
+  p = behind(p, [tile(T, r, 'Title tile'), tile(N, r, 'Count tile', '#f5f5f6'), tile(F, r, 'Featured tile'), tile(G, r, 'Sample tile')]);
+  return { ...p, objects: [...p.objects, ...featuredImage(p, a, F.x + F.w / 2, F.y + (F.h - (wide ? 150 : 110)) / 2, box)] };
+}
+
+export const IN_USE_TEMPLATES: TemplateDef[] = [
+  {
+    id: 'ui-inventory',
+    name: 'Inventory Mockup',
+    group: 'Game UI mockups',
+    look: 'pro-modern-gaming',
+    w: 1920,
+    h: 1080,
+    description: 'Your icons in an inventory grid with empty slots, one selected and its name, category and size in a tooltip card.',
+    build: (assets, pack) => inventoryPage(assets, pack),
+  },
+  {
+    id: 'ui-inventory-cover',
+    name: 'Inventory Cover',
+    group: 'itch.io covers',
+    look: 'pro-modern-gaming',
+    w: 630,
+    h: 500,
+    description: 'Store cover: title and facts above an inventory of slots — shows the icons in use, readable as a small thumbnail.',
+    build: (assets, pack) => inventoryCover(assets, pack),
+  },
+  {
+    id: 'ui-hotbar',
+    name: 'Hotbar Banner',
+    group: 'Game UI mockups',
+    look: 'pro-modern-gaming',
+    w: 1920,
+    h: 640,
+    description: 'Wide banner: centred title over a ten-slot hotbar with number keys, the first slot selected.',
+    build: (assets, pack) => hotbarBanner(assets, pack),
+  },
+  {
+    id: 'size-ladder',
+    name: 'Size Ladder',
+    group: 'Game UI mockups',
+    look: 'pro-technical',
+    w: 1920,
+    h: 1080,
+    description: 'One icon at several sizes with exact pixel labels (whole-number steps for pixel art), more icons below.',
+    build: (assets, pack) => sizeLadder(assets, pack),
+  },
+  {
+    id: 'bento',
+    name: 'Bento Showcase',
+    group: 'Clean & professional',
+    look: 'pro-studio-dark',
+    w: 1920,
+    h: 1080,
+    description: 'Tiles with one job each: the name and facts, the icon count, one icon in focus and a sample grid.',
+    build: (assets, pack) => bentoPage(assets, pack, 'wide'),
+  },
+  {
+    id: 'bento-square',
+    name: 'Bento Square',
+    group: 'Square & social',
+    look: 'pro-studio-dark',
+    w: 1080,
+    h: 1080,
+    description: 'Square bento for social posts: title tile, a featured icon, the count and a small sample grid.',
+    build: (assets, pack) => bentoPage(assets, pack, 'square'),
+  },
+];
+BUILTIN_TEMPLATES.push(...IN_USE_TEMPLATES);
 
 // A long pack name must shrink its title, never wrap it onto the badge or icons below. Every
 // template gets that pass except the two whose output is frozen (tests/protectedTemplates.test.ts).

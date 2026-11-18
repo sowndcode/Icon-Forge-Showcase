@@ -1,6 +1,6 @@
 # Ground Plane and Perspective Floor performance (0.2.0-alpha.1)
 
-Measured with `bench/` (see bench/README.md) on the same machine for both versions: headless
+Measured with `tests/bench/` (see tests/bench/README.md) on the same machine for both versions: headless
 Chromium with software rendering, a 1920×1080 page, synthetic icons (256 px originals, previews at
 the app's usual sizes), editor view 1600×900 at device pixel ratio 1. All times in milliseconds.
 A GPU-accelerated desktop will be faster in absolute terms; the comparison is what matters.

@@ -43,7 +43,7 @@ await flipFuses(path.join(dir, 'IconForgeShowcase.exe'), {
 // Licence notices that must travel with the app. Electron's own (LICENSE, LICENSES.chromium.html) are
 // already in the folder; add this project's and those of every runtime package bundled into dist/.
 copyFileSync(path.join(root, 'LICENSE'), path.join(dir, 'LICENSE.IconForgeShowcase.txt'));
-copyFileSync(path.join(root, 'THIRD_PARTY_NOTICES.md'), path.join(dir, 'THIRD_PARTY_NOTICES.md'));
+copyFileSync(path.join(root, 'docs', 'THIRD_PARTY_NOTICES.md'), path.join(dir, 'THIRD_PARTY_NOTICES.md'));
 
 function runtimePackages(names, seen = new Map()) {
   for (const name of names) {

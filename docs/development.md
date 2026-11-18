@@ -9,11 +9,11 @@
 | `npm test` | Unit tests (Vitest) |
 | `npm run typecheck` | TypeScript checks |
 | `npm run build` | Typecheck and production build of the interface into `dist/` |
-| `npm run package` | Portable Windows folder in `release/` (also `build_exe.bat`) |
+| `npm run package` | Portable Windows folder in `release/` (also `scripts\build_exe.bat`) |
 
 `npm run app` also downloads the Electron runtime if npm skipped it. The packaged folder is unsigned
 and meant for personal use; versions, the release checklist and how to update an installed copy are
-in [RELEASING.md](../RELEASING.md).
+in [RELEASING.md](RELEASING.md).
 
 ## Visual and end-to-end checks
 
@@ -25,7 +25,7 @@ installation, against a freshly started `npm run dev`:
 | `node tests/e2e/run.mjs` | Review, the import dialog and the Export workflows |
 | `node tests/e2e/audit-templates.mjs` | Every template under several themes as contact sheets, with a measured readability check |
 | `node tests/e2e/settings.mjs` | Every Settings page |
-| `node bench/run.mjs` | Layout and rendering performance ([performance.md](performance.md)) |
+| `node tests/bench/run.mjs` | Layout and rendering performance ([performance.md](performance.md)) |
 
 `audit-templates.mjs` takes `--themes=`, `--n=` (icon count) and `--title=`, which is the quickest way
 to see how a template change behaves with small packs, large packs and long names.

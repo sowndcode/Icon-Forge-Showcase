@@ -1,6 +1,7 @@
 @echo off
-rem Builds a standalone app: release\IconForgeShowcase-win32-x64\IconForgeShowcase.exe (copy that whole folder to share it).
-cd /d "%~dp0"
+rem Builds a standalone app in the project root: release\IconForgeShowcase-win32-x64\IconForgeShowcase.exe (copy that whole folder to share it).
+rem this file lives in scripts\, so work from the folder above it
+cd /d "%~dp0.."
 where node >nul 2>nul || (echo Node.js is required to build. & pause & exit /b 1)
 if not exist "node_modules\electron" call npm ci
 call npm run package || (echo Build failed. & pause & exit /b 1)

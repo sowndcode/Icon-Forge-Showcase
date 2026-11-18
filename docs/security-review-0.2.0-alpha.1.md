@@ -80,7 +80,7 @@ asar archive; no source maps; the executable carries the app icon (16–256 px),
   are checked by the main process as before.
 - **Readability, layout icon choice, export preview, new page dialog, sidebar.** Renderer-only code:
   no network, no filesystem, no dynamic code.
-- **Development tools** (`bench/`, `tests/e2e/`, `scripts/brand-icons.mjs`) use Playwright from a global
+- **Development tools** (`tests/bench/`, `tests/e2e/`, `scripts/brand-icons.mjs`) use Playwright from a global
   installation and run only on a developer's machine; they are not part of the build or the package.
 
 ## Secrets and personal data
