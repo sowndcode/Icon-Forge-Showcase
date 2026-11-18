@@ -28,7 +28,9 @@ test-fixtures/
 # local environment, editor and tool settings
 .env
 .env.*
-.claude/
+# Claude Code: personal settings stay local; the shared project skills in .claude/skills/ are tracked
+.claude/*
+!.claude/skills/
 .idea/
 .vscode/
 *.code-workspace
