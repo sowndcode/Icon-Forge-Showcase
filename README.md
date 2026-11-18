@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://sownddddd.itch.io/icon-forge-showcase"><b>Get it on itch.io</b></a> ·
-  <a href="https://github.com/sowndcode/Icon-Forge-Showcase/releases">GitHub releases</a> ·
+  <a href="#download-and-install"><b>Download</b></a> ·
+  <a href="https://sownddddd.itch.io/icon-forge-showcase">itch.io page</a> ·
   <a href="docs/features.md">All features</a> ·
   <a href="docs/CHANGELOG.md">Changelog</a>
 </p>
@@ -64,19 +64,9 @@ images. Everything stays editable, and nothing leaves your computer.
 
 ## Download and install
 
-Icon Forge Showcase runs on **Windows 10 and 11 (64-bit)**.
+Icon Forge Showcase runs on **Windows 10 and 11 (64-bit)** and is downloaded from this repository.
 
-1. Download the ZIP from [itch.io](https://sownddddd.itch.io/icon-forge-showcase) or the
-   [GitHub releases](https://github.com/sowndcode/Icon-Forge-Showcase/releases).
-2. Extract it to a folder you can write to, such as `Documents\Icon Forge Showcase`. Your projects
-   are saved in a `data` folder next to the app, so avoid `C:\Program Files`.
-3. Double-click **`IconForgeShowcase.exe`**.
-
-The app is not code-signed yet, so Windows SmartScreen may show *"Windows protected your PC"*. Choose
-**More info**, then **Run anyway**, but only for a ZIP from the two links above.
-
-<details>
-<summary><b>Run from source</b></summary>
+### Run from source
 
 You need [Node.js](https://nodejs.org/) 20.19+ or 22.12+ and about 500 MB of disk space.
 
@@ -87,11 +77,17 @@ npm ci
 npm run app
 ```
 
-After the first run you can also start it with `Start Icon Forge Showcase.bat`. To update, run
-`git pull` and `npm ci`; your `data/` folder is never touched by Git. More in
+After the first run you can start it with `Start Icon Forge Showcase.bat`. To update, run `git pull`
+and `npm ci`; your `data/` folder is never touched by Git. More in
 [docs/development.md](docs/development.md).
 
-</details>
+### Portable build
+
+Once a ZIP is published on the [Releases page](https://github.com/sowndcode/Icon-Forge-Showcase/releases),
+you can skip Node.js: extract the ZIP to a folder you can write to (such as
+`Documents\Icon Forge Showcase`, not `C:\Program Files`) and double-click **`IconForgeShowcase.exe`**.
+The build is not code-signed yet, so Windows SmartScreen may show *"Windows protected your PC"*:
+choose **More info**, then **Run anyway**, but only for a ZIP from that page.
 
 ## Private by design
 
@@ -109,12 +105,12 @@ Icon Forge Showcase is in **alpha**: it is usable every day, but expect rough ed
   older projects are migrated when it does.
 - Windows is the only tested platform.
 - Templates use fonts that come with Windows. You can import your own fonts per project.
-- There is no auto-update yet: download the new ZIP to update.
+- There is no auto-update yet: update with `git pull`, or download the newest ZIP.
 
 ## Support the project
 
 Icon Forge Showcase is free. If it helps you sell your packs, the best way to support it right now is
-through the [itch.io page](https://sownddddd.itch.io/icon-forge-showcase). More ways to support the
+by following the project on its [itch.io page](https://sownddddd.itch.io/icon-forge-showcase). More ways to support the
 project will be added in the future.
 
 ## Feedback and contributing
