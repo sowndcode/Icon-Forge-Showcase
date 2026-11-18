@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="assets/itch/itch-cover-630x500.png" width="560" alt="Icon Forge Showcase: the editor turning a detective icon pack into an itch.io cover">
+  <img src="assets/itch/itch-cover-630x500.png" width="560" alt="Icon Forge Showcase: the editor turning a detective icon pack into a store cover">
 </p>
 
 <h1 align="center">Icon Forge Showcase</h1>
 
 <p align="center">
-  <b>Make itch.io covers, thumbnails and catalogs for your game icon packs in minutes.</b><br>
+  <b>Make store covers, thumbnails and catalogs for your game icon packs in minutes.</b><br>
   A free, offline desktop app for Windows that lays out your icons for you.
 </p>
 
@@ -25,12 +25,22 @@ images. Everything stays editable, and nothing leaves your computer.
 
 ## What you can make
 
-- **itch.io covers (630 × 500)** that read clearly as small thumbnails in search results.
-- **Wide thumbnails and banners** for store pages, Steam capsules and YouTube.
+- **Store covers and thumbnails** that stay readable at the small sizes stores show in search.
+- **Wide banners and headers** for store pages, Steam capsules and YouTube.
 - **Full catalogs** of every icon, grouped by category and numbered, up to 4K.
 - **Free-demo covers** with a FREE DEMO badge and the size of the full pack.
 - **Game UI mockups** that show your icons in an inventory, on a hotbar, or at real pixel sizes.
 - **Square, portrait and story formats** for social posts.
+
+Exact sizes are built in for:
+
+| | |
+|---|---|
+| **Marketplaces** | itch.io, Steam, Unity Asset Store, Fab (Unreal), Gumroad, Etsy |
+| **Social media** | Instagram, TikTok, X, Facebook, Pinterest, Reddit, Bluesky, LinkedIn, Discord, Patreon |
+| **Video** | YouTube, Twitch |
+
+Or any custom size, from a 320 px panel to a 4K catalog.
 
 ![The template library, filled with a real icon pack](docs/screenshots/templates.png)
 
@@ -110,9 +120,8 @@ Icon Forge Showcase is in **alpha**: it is usable every day, but expect rough ed
 ## Support the project
 
 Icon Forge Showcase is free. I make and sell game icon packs on [itch.io](https://sownddddd.itch.io/),
-and buying one is the most direct way to support the app right now. You can also follow
-[Icon Forge Showcase on itch.io](https://sownddddd.itch.io/icon-forge-showcase) for updates. More ways
-to support the project will be added in the future.
+and buying one is the most direct way to support the app right now. More ways to support the project
+will be added in the future.
 
 ## Feedback and contributing
 
