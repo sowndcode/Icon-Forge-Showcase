@@ -88,8 +88,11 @@ const recentlyWritten = (fp) => fp.split('\n').some((l) => Date.now() - Number(l
  *   { phase: 'none' | 'done' }        nothing to do
  *   { phase: 'pending', from }        the window has to import the copied data
  *   { phase: 'blocked', from }        an older version is still open — ask the user to close it
+ * `opts.helpersRunning` replaces the process check (tests: on Windows the real one starts PowerShell
+ * and takes seconds).
  */
-function prepare(layout, legacyDirs) {
+function prepare(layout, legacyDirs, opts = {}) {
+  const helpersAlive = opts.helpersRunning ?? helpersRunning;
   L = layout;
   const state = readState();
   if (state?.phase === 'done' || state?.phase === 'none') return state;
@@ -103,7 +106,7 @@ function prepare(layout, legacyDirs) {
   // the database must be at rest: a copy taken while it's being written can bring back deleted items
   // or miss recent ones, so wait until nothing is using it
   const before = fingerprint(from);
-  if (inUse(from) || recentlyWritten(before) || helpersRunning(from)) return { phase: 'blocked', from };
+  if (inUse(from) || recentlyWritten(before) || helpersAlive(from)) return { phase: 'blocked', from };
 
   // copy into a staging folder, check nothing changed meanwhile, then swap it in whole
   // (a half-finished copy from an interrupted earlier start is ours and is replaced, never merged)

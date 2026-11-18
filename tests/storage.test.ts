@@ -178,6 +178,10 @@ describe('migration', () => {
   const legacy = path.join(tmp, 'old profile');
   const L2 = paths.layout(path.join(tmp, 'data2'), path.join(tmp, 'exports2'));
 
+  // the real check for an earlier version's helper processes starts PowerShell on Windows (seconds on
+  // a cold CI runner); these tests are about copying, so they say "none running" unless a test says so
+  const noHelpers = { helpersRunning: () => false };
+
   const age = (dir: string) => {
     const old = new Date(Date.now() - 3600_000);
     for (const e of fs.readdirSync(dir, { withFileTypes: true, recursive: true })) fs.utimesSync(path.join(e.parentPath, e.name), old, old);
@@ -193,12 +197,20 @@ describe('migration', () => {
     expect(fs.existsSync(path.join(L2.profile, 'IndexedDB'))).toBe(false);
   }, 30_000);
 
+  it('waits while an earlier version\'s helper processes may still write the database', () => {
+    age(legacy);
+    const L5 = paths.layout(path.join(tmp, 'data5'), path.join(tmp, 'exports5'));
+    paths.ensureDirs(L5);
+    expect(migrate.prepare(L5, [legacy], { helpersRunning: () => true }).phase).toBe('blocked');
+    expect(fs.existsSync(path.join(L5.profile, 'IndexedDB'))).toBe(false);
+  });
+
   it('copies the old profile without changing it, replacing a half-finished earlier copy', () => {
     age(legacy);
     // left over from an interrupted start: must not be merged with the new copy
     fs.mkdirSync(path.join(L2.profile, 'IndexedDB', 'db'), { recursive: true });
     fs.writeFileSync(path.join(L2.profile, 'IndexedDB', 'db', 'stale.ldb'), 'stale');
-    const r = migrate.prepare(L2, [legacy]);
+    const r = migrate.prepare(L2, [legacy], noHelpers);
     expect(fs.existsSync(path.join(L2.profile, 'IndexedDB', 'db', 'stale.ldb'))).toBe(false);
     expect(r.phase).toBe('pending');
     expect(fs.readFileSync(path.join(L2.profile, 'IndexedDB', 'db', '000.log'), 'utf8')).toBe('old');
@@ -231,7 +243,7 @@ describe('migration', () => {
   it('marks an unverified import as failed so it runs again', async () => {
     const L3 = paths.layout(path.join(tmp, 'data3'), path.join(tmp, 'exports3'));
     paths.ensureDirs(L3);
-    migrate.prepare(L3, [legacy]);
+    migrate.prepare(L3, [legacy], noHelpers);
     store.init(L3);
     const r = await migrate.finish({ projects: { written: ['missing1'] }, blobKeys: [], errors: [] });
     expect(r.ok).toBe(false);
