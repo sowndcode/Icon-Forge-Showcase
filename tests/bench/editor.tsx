@@ -2,12 +2,12 @@
 // Every animation-frame callback is timed (that is where the editor draws), while the benchmark
 // applies a layout, pans, zooms with the wheel and moves the pointer over a full selection.
 import { createRoot } from 'react-dom/client';
-import { createPage, createProject } from '../src/core/defaults';
-import { getPage, loadDoc } from '../src/state/doc';
-import { applyLayout } from '../src/state/layoutActions';
-import { newImageObject } from '../src/state/objects';
-import { fitView } from '../src/state/ui';
-import { Editor } from '../src/ui/canvas/Editor';
+import { createPage, createProject } from '../../src/core/defaults';
+import { getPage, loadDoc } from '../../src/state/doc';
+import { applyLayout } from '../../src/state/layoutActions';
+import { newImageObject } from '../../src/state/objects';
+import { fitView } from '../../src/state/ui';
+import { Editor } from '../../src/ui/canvas/Editor';
 import { makeIcons } from './icons';
 
 const q = new URLSearchParams(location.search);

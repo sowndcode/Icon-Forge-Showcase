@@ -41,7 +41,7 @@ anecdote, not a measurement; it is consistent with the skill's purpose but prove
 
 ## 2. Marketing: `product-marketing` on this repository
 
-- Ran the skill's *auto-draft from codebase* mode. Output: `.agents/product-marketing.md` v1 (README,
+- Ran the skill's *auto-draft from codebase* mode. Output: `.claude/product-marketing.md` v1 (README,
   `docs/features.md` and `package.json` as sources). Every unknown — customer quotes, metrics, business
   goal, direct competitors — is marked **TODO** rather than filled in, as the skill asks for verbatim
   customer language it cannot invent.

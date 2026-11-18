@@ -8,11 +8,11 @@ npm run dev
 ```
 
 ```bash
-node bench/run.mjs --page=editor
+node tests/bench/run.mjs --page=editor
 ```
 
 ```bash
-node bench/run.mjs --page=index
+node tests/bench/run.mjs --page=index
 ```
 
 - `editor.html` mounts the real editor canvas at 1600×900 and times every animation frame while it

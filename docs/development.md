@@ -25,7 +25,7 @@ installation, against a freshly started `npm run dev`:
 | `node tests/e2e/run.mjs` | Review, the import dialog and the Export workflows |
 | `node tests/e2e/audit-templates.mjs` | Every template under several themes as contact sheets, with a measured readability check |
 | `node tests/e2e/settings.mjs` | Every Settings page |
-| `node bench/run.mjs` | Layout and rendering performance ([performance.md](performance.md)) |
+| `node tests/bench/run.mjs` | Layout and rendering performance ([performance.md](performance.md)) |
 
 `audit-templates.mjs` takes `--themes=`, `--n=` (icon count) and `--title=`, which is the quickest way
 to see how a template change behaves with small packs, large packs and long names.

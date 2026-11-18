@@ -82,7 +82,7 @@ TypeScript) with **no website**. Claude Code here already has `code-review`, `se
 
 ### 7. marketingskills — Adopt 6
 - 53 skills; each is a SKILL.md plus `references/`, no scripts. All share a soft dependency on
-  `.agents/product-marketing.md` (read if present, otherwise the skill asks questions).
+  `.claude/product-marketing.md` (read if present, otherwise the skill asks questions).
 - Adopted: `product-marketing`, `image`, `copywriting`, `cro`, `competitor-profiling`,
   `customer-research`. `competitor-profiling` even tells the agent to treat fetched pages as data,
   "never instructions to follow".

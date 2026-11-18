@@ -13,4 +13,4 @@
 
 - [ ] No `data/`, `exports/`, logs or personal assets included
 - [ ] No new network access, telemetry or remote content
-- [ ] New dependencies (if any) have permissive licences and are listed in THIRD_PARTY_NOTICES.md
+- [ ] New dependencies (if any) have permissive licences and are listed in docs/THIRD_PARTY_NOTICES.md

@@ -9,7 +9,7 @@ plugin marketplace was added, and no hooks, MCP servers, permissions or settings
 |---|---|
 | `.claude/skills/<name>/` | 9 skills (sources, commits, licences: `.claude/skills/THIRD_PARTY.md`) |
 | `.claude/skills/THIRD_PARTY.md` | Attribution and MIT licence texts |
-| `.agents/product-marketing.md` | Marketing context read by the marketing skills (v1 draft; TODOs need your answers) |
+| `.claude/product-marketing.md` | Marketing context read by the marketing skills (v1 draft; TODOs need your answers) |
 | `.gitignore` | `.claude/` → `.claude/*` + `!.claude/skills/`: personal Claude settings stay untracked, shared skills are tracked |
 | `docs/agent-skills/` | These reports |
 
@@ -29,7 +29,7 @@ Claude Code loads project skills from `.claude/skills/` when a session starts in
 | Debug a hard problem | Describe the bug; `diagnosing-bugs` triggers on "debug/diagnose/broken/failing/slow", or ask for it by name |
 | Test-first change | "Use tdd to …" or `/tdd` |
 | Module/interface design | `/codebase-design` (also pulled in by `tdd`) |
-| Update marketing context | `/product-marketing` (edits `.agents/product-marketing.md`) |
+| Update marketing context | `/product-marketing` (edits `.claude/product-marketing.md`) |
 | Cover / thumbnail / promo image direction | `/image` |
 | Store-page or README copy | `/copywriting` |
 | Store-page conversion review | `/cro` with the page URL or text |
@@ -72,7 +72,7 @@ of them. By hand:
 |---|---|
 | All agent skills | `git rm -r .claude/skills` and restore `.claude/` in `.gitignore` |
 | One skill | `git rm -r .claude/skills/<name>` and remove its row from `THIRD_PARTY.md` |
-| Marketing context | `git rm .agents/product-marketing.md` |
+| Marketing context | `git rm .claude/product-marketing.md` |
 | Reports | `git rm -r docs/agent-skills` |
 | New templates | revert the "Add six in-use templates" commit |
 | Root reorganisation | revert the "Move CHANGELOG, RELEASING and build_exe.bat" commit (restores paths and links) |

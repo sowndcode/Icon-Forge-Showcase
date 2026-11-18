@@ -91,7 +91,7 @@ Everything below up to 0.1.0-alpha.1 is part of this version. This milestone's p
   Perspective Floor pans in 1.7 ms instead of 150 ms. Exports and previews keep full resolution and
   exact warps; the editor may show a fast warp of the same four corners for a frame or two while the
   exact one is made.
-- `bench/` measures the layout action, the editor frame by frame and the export render with the app's
+- `tests/bench/` measures the layout action, the editor frame by frame and the export render with the app's
   own modules.
 
 ### Added

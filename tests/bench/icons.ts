@@ -1,6 +1,6 @@
 // Synthetic icon packs for the benchmarks: 40 distinct drawings, one preview bitmap per asset.
-import type { AssetRecord } from '../src/core/types';
-import { images, previewMaxFor } from '../src/render/images';
+import type { AssetRecord } from '../../src/core/types';
+import { images, previewMaxFor } from '../../src/render/images';
 
 export async function makeIcons(n: number) {
   const SRC = 256;

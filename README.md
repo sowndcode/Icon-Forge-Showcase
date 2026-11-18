@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="itch-assets/itch-cover-630x500.png" width="560" alt="Icon Forge Showcase: the editor turning a detective icon pack into an itch.io cover">
+  <img src="assets/itch/itch-cover-630x500.png" width="560" alt="Icon Forge Showcase: the editor turning a detective icon pack into an itch.io cover">
 </p>
 
 <h1 align="center">Icon Forge Showcase</h1>
@@ -119,10 +119,10 @@ project will be added in the future.
 
 ## Feedback and contributing
 
-Bug reports, ideas and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) to get
+Bug reports, ideas and pull requests are welcome. See [CONTRIBUTING.md](.github/CONTRIBUTING.md) to get
 started and [docs/development.md](docs/development.md) for the source tree and checks. Please report
-security problems privately as described in [SECURITY.md](SECURITY.md).
+security problems privately as described in [SECURITY.md](.github/SECURITY.md).
 
 ## License
 
-[MIT](LICENSE). Third-party components are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+[MIT](LICENSE). Third-party components are listed in [docs/THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md).

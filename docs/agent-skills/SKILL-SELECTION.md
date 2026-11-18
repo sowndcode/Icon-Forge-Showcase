@@ -12,7 +12,7 @@ Classification: **Adopt** (installed), **Optional** (useful in specific cases; n
 | `diagnosing-bugs` | mattpocock/skills | Hard bugs: canvas rendering, layout, Electron IPC, export | A disciplined reproduce → hypothesise → instrument loop; nothing built-in does this. Chosen over superpowers `systematic-debugging` (overlap; that one comes with "MUST" language) | ~30 words (description) |
 | `tdd` | mattpocock/skills | Test-first fixes in a codebase with 576 vitest tests | Short, practical; calls `codebase-design` | ~25 words |
 | `codebase-design` | mattpocock/skills | Interface/seam decisions (renderer vs state, layout registry) | Required by `tdd`; useful vocabulary on its own | ~45 words |
-| `product-marketing` | marketingskills | Keeps `.agents/product-marketing.md`, which the other five read | Foundation; avoids re-explaining the product each time | 0 (manual only) |
+| `product-marketing` | marketingskills | Keeps `.claude/product-marketing.md`, which the other five read | Foundation; avoids re-explaining the product each time | 0 (manual only) |
 | `image` | marketingskills | Cover/thumbnail and promo-image direction | Closest match to the thumbnail use case | 0 |
 | `copywriting` | marketingskills | itch.io/README page copy, template wording | Good "AI tells" list; diagnoses before rewriting | 0 |
 | `cro` | marketingskills | Store-page conversion review | Requested; works on any page you share (e.g. an itch.io listing) | 0 |

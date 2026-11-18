@@ -1,19 +1,19 @@
 // Layout performance benchmark (development only, not part of the app build).
-//   npm run dev, then open http://localhost:5183/bench/index.html?n=20,180,1000,2267&alg=floor,groundplane
-// or run `node bench/run.mjs`, which drives it headless and prints the table.
+//   npm run dev, then open http://localhost:5183/tests/bench/index.html?n=20,180,1000,2267&alg=floor,groundplane
+// or run `node tests/bench/run.mjs`, which drives it headless and prints the table.
 // Every number is a real measurement of the app's own modules: the layout action (with undo history),
 // the editor's page render (cold, panned, zoom steps), hit testing and the export render.
 
-import { createPage, createProject } from '../src/core/defaults';
-import type { ImageObject } from '../src/core/types';
-import { hitObject } from '../src/core/transform';
-import { images } from '../src/render/images';
+import { createPage, createProject } from '../../src/core/defaults';
+import type { ImageObject } from '../../src/core/types';
+import { hitObject } from '../../src/core/transform';
+import { images } from '../../src/render/images';
 import { makeIcons } from './icons';
-import { renderPage } from '../src/render/renderer';
-import { renderPageCanvas } from '../src/services/exporter';
-import { getAsset, getPage, loadDoc, useDoc } from '../src/state/doc';
-import { applyLayout } from '../src/state/layoutActions';
-import { newImageObject } from '../src/state/objects';
+import { renderPage } from '../../src/render/renderer';
+import { renderPageCanvas } from '../../src/services/exporter';
+import { getAsset, getPage, loadDoc, useDoc } from '../../src/state/doc';
+import { applyLayout } from '../../src/state/layoutActions';
+import { newImageObject } from '../../src/state/objects';
 
 const q = new URLSearchParams(location.search);
 const COUNTS = (q.get('n') ?? '20,180,1000,2267').split(',').map(Number);
