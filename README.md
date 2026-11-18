@@ -5,7 +5,7 @@
 <h1 align="center">Icon Forge Showcase</h1>
 
 <p align="center">
-  <b>Make itch.io covers, thumbnails and catalogs for your game icon packs in minutes.</b><br>
+  <b>Make covers, thumbnails and catalogs for your game icon packs in minutes.</b><br>
   A free, offline desktop app for Windows that lays out your icons for you.
 </p>
 
