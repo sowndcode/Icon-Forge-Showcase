@@ -102,7 +102,7 @@ updating, [SECURITY.md](SECURITY.md) for reporting a problem.
 - **The app folder must be writable.** If it isn't, the app warns you and saves to your user profile
   for that session.
 - **No auto-update and no signed builds.** Updating means downloading the new ZIP; see
-  [RELEASING.md](RELEASING.md).
+  [docs/RELEASING.md](docs/RELEASING.md).
 
 ## Development and contributing
 
@@ -111,7 +111,7 @@ pull requests are welcome.
 
 - [docs/development.md](docs/development.md): commands, checks and a map of the source tree.
 - [CONTRIBUTING.md](CONTRIBUTING.md): how to report a bug or propose a change.
-- [CHANGELOG.md](CHANGELOG.md): what changed in each version.
+- [docs/CHANGELOG.md](docs/CHANGELOG.md): what changed in each version.
 
 Please report security problems privately, as described in [SECURITY.md](SECURITY.md), not in a
 public issue.

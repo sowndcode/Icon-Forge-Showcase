@@ -39,7 +39,7 @@ Releases are made by a maintainer. Nothing is published or tagged automatically.
    npm version 0.2.0-alpha.2 --no-git-tag-version
    ```
 
-3. Move the `[Unreleased]` notes in `CHANGELOG.md` under the new version and date.
+3. Move the `[Unreleased]` notes in `docs/CHANGELOG.md` under the new version and date.
 
 4. Install exactly what the lockfile says, then check everything.
 
@@ -117,7 +117,7 @@ Releases are made by a maintainer. Nothing is published or tagged automatically.
    ```
 
 9. On GitHub, draft a release from the tag: title `Icon Forge Showcase <version>`, notes from
-   `docs/releases/` (copy the latest file and update it) and the `CHANGELOG.md` section, the ZIP from
+   `docs/releases/` (copy the latest file and update it) and the `docs/CHANGELOG.md` section, the ZIP from
    step 6 as the only asset, and **Set as a pre-release** for alpha and beta versions. Check the draft,
    download the asset once from the draft page and compare its size with the local ZIP, then publish.
 

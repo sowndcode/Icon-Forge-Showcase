@@ -133,7 +133,7 @@ Everything below up to 0.1.0-alpha.1 is part of this version. This milestone's p
 - **Settings:** shortcuts are separate keycaps that wrap only between alternatives; the About data
   folder is shortened in the middle with Copy and Open buttons; the version shown comes from
   `package.json` only.
-- **Versioning:** see `RELEASING.md` for the version policy and the build and release steps.
+- **Versioning:** see `docs/RELEASING.md` for the version policy and the build and release steps.
 
 ### Release engineering
 

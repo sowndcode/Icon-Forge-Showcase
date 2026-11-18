@@ -9,11 +9,11 @@
 | `npm test` | Unit tests (Vitest) |
 | `npm run typecheck` | TypeScript checks |
 | `npm run build` | Typecheck and production build of the interface into `dist/` |
-| `npm run package` | Portable Windows folder in `release/` (also `build_exe.bat`) |
+| `npm run package` | Portable Windows folder in `release/` (also `scripts\build_exe.bat`) |
 
 `npm run app` also downloads the Electron runtime if npm skipped it. The packaged folder is unsigned
 and meant for personal use; versions, the release checklist and how to update an installed copy are
-in [RELEASING.md](../RELEASING.md).
+in [RELEASING.md](RELEASING.md).
 
 ## Visual and end-to-end checks
 
