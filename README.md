@@ -10,10 +10,10 @@
 </p>
 
 <p align="center">
-  <a href="#download-and-install"><b>Download</b></a> ·
-  <a href="https://sownddddd.itch.io/icon-forge-showcase">itch.io page</a> ·
+  <a href="https://sownddddd.itch.io/icon-forge-showcase"><b>itch.io page</b></a> ·
   <a href="docs/features.md">All features</a> ·
-  <a href="docs/CHANGELOG.md">Changelog</a>
+  <a href="docs/CHANGELOG.md">Changelog</a> ·
+  <a href="#download-and-install">Download</a>
 </p>
 
 ---
@@ -109,9 +109,10 @@ Icon Forge Showcase is in **alpha**: it is usable every day, but expect rough ed
 
 ## Support the project
 
-Icon Forge Showcase is free. If it helps you sell your packs, the best way to support it right now is
-by following the project on its [itch.io page](https://sownddddd.itch.io/icon-forge-showcase). More ways to support the
-project will be added in the future.
+Icon Forge Showcase is free. I make and sell game icon packs on [itch.io](https://sownddddd.itch.io/),
+and buying one is the most direct way to support the app right now. You can also follow
+[Icon Forge Showcase on itch.io](https://sownddddd.itch.io/icon-forge-showcase) for updates. More ways
+to support the project will be added in the future.
 
 ## Feedback and contributing
 
