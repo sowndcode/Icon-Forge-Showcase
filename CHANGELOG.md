@@ -8,6 +8,13 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- **Six in-use templates** that show icons the way a game uses them, with every label read from the
+  files: *Inventory Mockup* (a slot grid with empty slots and a tooltip card naming the selected icon,
+  its category and size), *Inventory Cover* (630 × 500), *Hotbar Banner* (a ten-slot hotbar with number
+  keys), *Size Ladder* (one icon at several sizes with exact pixel labels; whole-number steps for pixel
+  art), *Bento Showcase* and *Bento Square* (tiles for the name, the count, a featured icon and a
+  sample). A new *Game UI mockups* section lists the first three. Slot frames stay on their icons when
+  the Format changes, and slots read on light and dark looks.
 - **Three templates:** Pack Contents (categories with their icon counts beside a grid), Light Spotlight
   Cover (a bright itch.io cover with one featured icon) and Clean Story (a portrait for stories and reels).
 - **Ten palette themes** in a new *Palettes* section: Sage, Terracotta, Mint, Peach sorbet, Concrete,

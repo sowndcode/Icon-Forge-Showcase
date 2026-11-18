@@ -17,8 +17,10 @@ Everything Icon Forge Showcase can do, by area. The [README](../README.md) has t
   layouts (endless floor, tilted wall, perspective floor and wall, and ground plane with icons lying
   flat). Random layouts are seeded, and objects you move by hand are pinned. The picker has search,
   favourites, recently used and live previews of your own icons.
-- **71 built-in templates** in groups: itch.io covers, clean & professional, wide thumbnails, square &
-  social, banners & headers, free demos, sales & comparisons, and catalogs (up to 4K). Templates can
+- **77 built-in templates** in groups: itch.io covers, clean & professional, game UI mockups, wide
+  thumbnails, square & social, banners & headers, free demos, sales & comparisons, and catalogs (up to
+  4K). Game UI mockups show icons in use: an inventory with a tooltip card, a hotbar and a size ladder
+  with exact pixel labels; their names, sizes and categories are read from your files. Templates can
   follow a colour theme, including themes built from your icons' colours. Each template page keeps its
   own options; changing one (for example Pixel → Pixel ++) changes only what it names. Right-click a
   template to apply only its layout, background or text style. With *Smart template recommendations*

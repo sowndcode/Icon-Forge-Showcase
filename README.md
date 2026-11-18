@@ -16,8 +16,8 @@ It is a desktop app for Windows that works entirely offline: no account, no uplo
 - **A whole store set in one click.** *Complete store set* builds a hero image, a square cover, a
   numbered catalog and a page per category from your pack, in one consistent look. *Custom store set*
   lets you choose the pages.
-- **71 templates that fill themselves in.** Covers, thumbnails, banners, social formats, free-demo
-  pages and catalogs, previewed with your own icons. The ones that suit your pack are listed first.
+- **77 templates that fill themselves in.** Covers, thumbnails, banners, social formats, free-demo
+  pages, catalogs and game UI mockups (inventory, hotbar, size ladder), previewed with your own icons. The ones that suit your pack are listed first.
 - **35 layouts that understand your icons.** Grids, clusters, honeycombs, rings, perspective floors
   and more, all arranged by each icon's *visible* pixels, not its file size.
 - **59 themes, plus themes made from your icons' colours,** with a contrast check so titles stay
